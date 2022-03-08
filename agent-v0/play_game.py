@@ -59,8 +59,8 @@ def main():
             action_vec = agent_a(observations[env.agent_a])
             new_observations, reward, done, info = env.step(action_vec)
             print(f"Player took action {info['action'].action_str}")
+            print(info["turn_desc"])
             print("New State:")
-            print(env.S.data)
             env.render()
             agent_a.report_SARS(
                 observations[env.agent_a],
@@ -69,8 +69,8 @@ def main():
             action_vec = agent_b(observations[env.agent_b])
             new_observations, reward, done, info = env.step(action_vec)
             print(f"Player took action {info['action'].action_str}")
+            print(info["turn_desc"])
             print("New State:")
-            print(env.S.data)
             env.render()
             agent_b.report_SARS(
                 observations[env.agent_b],
