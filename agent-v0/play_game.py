@@ -1,22 +1,56 @@
 #!/usr/bin/env python3
 
+import sys
+import time
+import numpy as np
+import argparse as ap
+from enum import Enum, auto
+
 import gym
 import gym_mad
-import numpy as np
 from agent import MadAgent_v0
-import time
+
+class AgentType(Enum):
+    human = auto()
+    random = auto()
+    dqn = auto()
+
+    def __str__(self):
+        # Here self is the member
+        return self.name
+
+agent_choices = [name for name, member in AgentType.__members__.items()]
+
+def parse_args():
+    parser = ap.ArgumentParser(description="Script to test an agent in the mad-v0 gym env")
+    parser.add_argument('--conf',type=str,default="default.json")
+    parser.add_argument('--agent_a',type=str,choices=agent_choices,default=str(AgentType.random))
+    parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.random))
+    parser.add_argument('--agent_a_path',type=str,default=None)
+    parser.add_argument('--agent_b_path',type=str,default=None)
+    parser.add_argument('--turn_delay','-d',type=int,default=0)
+    return parser.parse_args()
+
+def get_player(env, agent_type_str, path):
+    if agent_type_str == str(AgentType.human):
+        raise ValueError("Human player not yet implemented")
+    elif agent_type_str == str(AgentType.random):
+        return MadAgent_v0(env.observation_size, env.action_size)
+    elif agent_type_str == str(AgentType.dqn):
+        raise ValueError("DQN agent not yet implemented")
 
 
-def main(args):
+def main():
+    args = parse_args()
 
     env = gym.make("mad-v0")
-    observations = env.reset()
+    observations = env.reset(args.conf)
     done = False
 
     # Currently setup for two AI playing against each other
     # Seperate AI for each player
-    agent_a = MadAgent_v0(env.observation_size, env.action_size)
-    agent_b = MadAgent_v0(env.observation_size, env.action_size)
+    agent_a = get_player(env, args.agent_a, args.agent_a_path)
+    agent_b = get_player(env, args.agent_b, args.agent_b_path)
 
     while not done:
 
@@ -26,6 +60,7 @@ def main(args):
             new_observations, reward, done, info = env.step(action_vec)
             print(f"Player took action {info['action'].action_str}")
             print("New State:")
+            print(env.S.data)
             env.render()
             agent_a.report_SARS(
                 observations[env.agent_a],
@@ -35,6 +70,7 @@ def main(args):
             new_observations, reward, done, info = env.step(action_vec)
             print(f"Player took action {info['action'].action_str}")
             print("New State:")
+            print(env.S.data)
             env.render()
             agent_b.report_SARS(
                 observations[env.agent_b],
@@ -47,5 +83,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # TODO: Do we need commandline args?
-    main(None)
+    main()
