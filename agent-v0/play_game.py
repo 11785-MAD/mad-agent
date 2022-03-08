@@ -76,10 +76,10 @@ def main():
                 observations[env.agent_b],
                 action_vec, reward, new_observations[env.agent_b])
 
-        time.sleep(3)
+        time.sleep(args.turn_delay)
         observations = new_observations
 
-    print("Game Over!")
+    print(f"Game Over! {info['winner']} won!")
 
 
 if __name__ == "__main__":
