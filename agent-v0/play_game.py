@@ -8,7 +8,7 @@ from enum import Enum, auto
 
 import gym
 import gym_mad
-from agent import MadAgent_v0
+from agent import RandomAgent
 
 class AgentType(Enum):
     human = auto()
@@ -35,7 +35,7 @@ def get_player(env, agent_type_str, path):
     if agent_type_str == str(AgentType.human):
         raise ValueError("Human player not yet implemented")
     elif agent_type_str == str(AgentType.random):
-        return MadAgent_v0(env.observation_size, env.action_size)
+        return RandomAgent(env.observation_size, env.action_size)
     elif agent_type_str == str(AgentType.dqn):
         raise ValueError("DQN agent not yet implemented")
 
