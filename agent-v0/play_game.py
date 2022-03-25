@@ -44,7 +44,8 @@ def main():
     args = parse_args()
 
     env = gym.make("mad-v0")
-    observations = env.reset(args.conf)
+    env.set_config_path(args.conf)
+    observations = env.reset()
     done = False
 
     # Currently setup for two AI playing against each other
