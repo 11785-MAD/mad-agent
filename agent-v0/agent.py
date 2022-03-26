@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class MadAgent_v0:
     def __init__(self, observation_size, action_size):
         self.observation_size = observation_size
@@ -20,9 +19,7 @@ class RandomAgent(MadAgent_v0):
         super().__init__(observation_size,action_size)
 
     def choose_action(self, observation):
-        return self.choose_random_action()
-
-    def choose_random_action(self):
+        # Choose a random action
         action_vec = np.zeros((self.action_size))
         action_idx = np.random.randint(0, self.action_size)
         action_vec[action_idx] = 1

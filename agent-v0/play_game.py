@@ -80,6 +80,8 @@ def main():
         time.sleep(args.turn_delay)
         observations = new_observations
 
+        print(f"End turn {info['turn_count']}")
+
     print(f"Game Over! {info['winner']} won!")
 
 
