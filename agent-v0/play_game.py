@@ -55,6 +55,7 @@ def main():
 
     while not done:
 
+        print("------------------------------------")
         print(f"Begin {env.current_player}'s turn")
         if env.current_player == env.agent_a:
             action_vec = agent_a(observations[env.agent_a])
@@ -80,7 +81,7 @@ def main():
         time.sleep(args.turn_delay)
         observations = new_observations
 
-        print(f"End turn {info['turn_count']}")
+        print(f"End turn {info['turn_count']}\n")
 
     print(f"Game Over! {info['winner']} won!")
 
