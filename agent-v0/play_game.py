@@ -65,7 +65,7 @@ def main():
             env.render()
             agent_a.report_SARS(
                 observations[env.agent_a],
-                action_vec, reward, new_observations[env.agent_a])
+                action_vec, reward, new_observations[env.agent_a], done)
         else:
             action_vec = agent_b(observations[env.agent_b])
             new_observations, reward, done, info = env.step(action_vec)
@@ -75,7 +75,7 @@ def main():
             env.render()
             agent_b.report_SARS(
                 observations[env.agent_b],
-                action_vec, reward, new_observations[env.agent_b])
+                action_vec, reward, new_observations[env.agent_b], done)
 
         time.sleep(args.turn_delay)
         observations = new_observations

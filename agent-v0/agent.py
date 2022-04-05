@@ -1,18 +1,20 @@
 import numpy as np
+import torch.nn as nn
 
-class MadAgent_v0:
+class MadAgent_v0(nn.Module):
     def __init__(self, observation_size, action_size):
+        super().__init__()
         self.observation_size = observation_size
         self.action_size = action_size
+
+    def forward(self, x):
+        return self.choose_action(x)
 
     def choose_action(self, observation):
         pass
 
-    def report_SARS(self, observation, action, reward, new_observation):
+    def report_SARS(self, observation, action, reward, new_observation, is_terminal):
         pass
-
-    def __call__(self, x):
-        return self.choose_action(x)
 
 class RandomAgent(MadAgent_v0):
     def __init__(self, observation_size, action_size):
