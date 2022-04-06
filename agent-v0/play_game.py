@@ -9,6 +9,7 @@ from enum import Enum, auto
 import gym
 import gym_mad
 from agent import RandomAgent
+from dqn import DQNAgent
 
 class AgentType(Enum):
     human = auto()
@@ -23,7 +24,7 @@ agent_choices = [name for name, member in AgentType.__members__.items()]
 
 def parse_args():
     parser = ap.ArgumentParser(description="Script to test an agent in the mad-v0 gym env")
-    parser.add_argument('--conf',type=str,default="default.json")
+    parser.add_argument('--env_conf',type=str,default="default.json")
     parser.add_argument('--agent_a',type=str,choices=agent_choices,default=str(AgentType.random))
     parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.random))
     parser.add_argument('--agent_a_path',type=str,default=None)
@@ -35,9 +36,11 @@ def get_player(env, agent_type_str, path):
     if agent_type_str == str(AgentType.human):
         raise ValueError("Human player not yet implemented")
     elif agent_type_str == str(AgentType.random):
-        return RandomAgent(env.observation_size, env.action_size)
+        agent = RandomAgent(env.observation_size, env.action_size)
     elif agent_type_str == str(AgentType.dqn):
-        raise ValueError("DQN agent not yet implemented")
+        agent = DQNAgent()
+
+    agent.initialize(env)
 
 
 def main():
