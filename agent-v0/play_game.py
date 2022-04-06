@@ -56,8 +56,13 @@ def main():
     agent_a = get_player(env, args.agent_a, args.agent_a_path)
     agent_b = get_player(env, args.agent_b, args.agent_b_path)
 
+    check_nukes = True # check if both players have nukes
+
+    turn_acquired_nukes = -1
+
     while not done:
 
+        print("------------------------------------")
         print(f"Begin {env.current_player}'s turn")
         if env.current_player == env.agent_a:
             action_vec = agent_a(observations[env.agent_a])
@@ -80,12 +85,22 @@ def main():
                 observations[env.agent_b],
                 action_vec, reward, new_observations[env.agent_b], done)
 
+        players_have_nukes = env.check_both_nukes()
+        if (check_nukes and players_have_nukes):
+            turn_acquired_nukes = info["turn_count"]
+            check_nukes = False
+
         time.sleep(args.turn_delay)
         observations = new_observations
 
-        print(f"End turn {info['turn_count']}")
+        print(f"End turn {info['turn_count']}\n")
 
     print(f"Game Over! {info['winner']} won!")
+
+    num_mad_turns = 0
+    if (turn_acquired_nukes != -1):
+        num_mad_turns = info['turn_count'] - turn_acquired_nukes
+    print("Turn acquired nukes: " + str(turn_acquired_nukes) + ", num_mad_turns: " + str(num_mad_turns))
 
 
 if __name__ == "__main__":

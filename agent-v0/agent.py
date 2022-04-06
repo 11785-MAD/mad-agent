@@ -30,7 +30,7 @@ class MadAgent_v0(nn.Module):
 
 class RandomAgent(MadAgent_v0):
     def __init__(self, observation_size, action_size):
-        super().__init__(observation_size,action_size)
+        super().__init__(observation_size, action_size)
 
     def choose_action(self, observation):
         # Choose a random action
