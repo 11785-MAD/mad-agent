@@ -103,7 +103,6 @@ class ReplayBuffer():
     def __init__(self, buffer_size:int, batch_size:int) -> None:
         self.buffer_size = buffer_size
         self.batch_size = batch_size
-        self.burn_in = burn_in
         self.queue = collections.deque(maxlen=buffer_size)
 
     def append(self, t:Transition) -> None:
@@ -196,7 +195,8 @@ class DQNAgent(agent.MadAgent_v0):
 
     def report_new_episode(self):
         self.episodes_seen += 1
-        if self.episodes_seen > self.buffer_burn_in:
+        if self.episodes_seen > self.buffer_burn_in and self.is_burning_in:
+            print(f"DQN finished {self.buffer_burn_in} burn in episodes")
             self.is_burning_in = False
             self.c = 0
 

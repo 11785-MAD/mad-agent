@@ -16,7 +16,7 @@ class MadAgent_v0(nn.Module):
     def forward(self, x):
         return self.choose_action(x)
 
-    def initialize(self, env):
+    def initialize(self):
         pass
 
     def report_new_episode(self):
