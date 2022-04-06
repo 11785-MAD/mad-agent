@@ -128,12 +128,12 @@ class DQNAgent(agent.MadAgent_v0):
     def __init__(self,
                  observation_size:int, 
                  action_size:int,
-                 epsilon:float,
-                 optimizer_lr:float,
-                 discount:float,
-                 buffer_size:int,
-                 buffer_batch_size:int,
-                 buffer_burn_in:int,
+                 epsilon:float = 0.05,
+                 optimizer_lr:float = 5e-4,
+                 discount:float = 0.99,
+                 buffer_size:int = 50000,
+                 buffer_batch_size:int = 32,
+                 buffer_burn_in:int = 10000,
                  ):
         '''
         Args:
@@ -190,7 +190,7 @@ class DQNAgent(agent.MadAgent_v0):
 
         return loss
     
-    def initialize(self, env):
+    def initialize(self):
         self.c = 0
         self.episodes_seen = 0
 
@@ -198,6 +198,7 @@ class DQNAgent(agent.MadAgent_v0):
         self.episodes_seen += 1
         if self.episodes_seen > self.buffer_burn_in:
             self.is_burning_in = False
+            self.c = 0
 
     def choose_action(self, observation):
         assert len(observation) == self.observation_size
@@ -230,3 +231,5 @@ class DQNAgent(agent.MadAgent_v0):
 
         if self.c % self.target_update_period == 0:
             self.set_Q_target()
+
+        self.c += 1
