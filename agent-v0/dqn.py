@@ -36,7 +36,7 @@ class QNetwork(nn.Module):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = lr)
 
     def forward(self, state:np.ndarray) -> torch.Tensor:
-        x = torch.Tensor(state)
+        x = torch.Tensor(state)  # TODO: send to correct device
         return self.model(x)
 
     def save_state_dict(self, path:str) -> None:
@@ -114,7 +114,8 @@ class ReplayBuffer():
 
         batch_size = min(batch_size, len(self.queue))
 
-        indices = np.random.randint(low=0, high=len(self.queue))
+        # TODO: use random.choice instead
+        indices = np.random.randint(low=0, high=len(self.queue), size=batch_size)
         transitions = TransitionList()
 
         for i in indices:
@@ -156,6 +157,7 @@ class DQNAgent(agent.MadAgent_v0):
     def set_Q_target(self):
         self.Q_target.model = copy.deepcopy(self.Q_w.model)
         self.Q_target.eval()
+        # TODO: set requires grad to be false
         
     def policy_random(self):
         action_idx = np.random.randint(0, self.action_size)
@@ -163,7 +165,7 @@ class DQNAgent(agent.MadAgent_v0):
 
     def policy_epsilon_greedy(self, q_vals:np.ndarray) -> int:
         if np.random.uniform() < self.epsilon:
-            return one_hot(self.action_size, np.random.randint(0, len(q_vals)))
+            return self.policy_random()
         return self.policy_greedy(q_vals)
 
     def policy_greedy(self, q_vals:np.ndarray) -> np.ndarray:
@@ -185,6 +187,8 @@ class DQNAgent(agent.MadAgent_v0):
         # Calculate predicted
         q = self.Q_w(states)  # [batch x action_size]
         (predicted, predicted_indices) = torch.max(q*actions, dim=1)  # [batch]
+
+        # Calculate loss
         loss = torch.nn.functional.mse_loss(target,predicted)  # []
 
         return loss
@@ -202,10 +206,10 @@ class DQNAgent(agent.MadAgent_v0):
 
     def choose_action(self, observation):
         assert len(observation) == self.observation_size
-        q_vals = self.Q_w(observation)
         if self.is_burning_in:
             return self.policy_random()
 
+        q_vals = self.Q_w(observation)
         if self.training:
             return self.policy_epsilon_greedy(q_vals)
 

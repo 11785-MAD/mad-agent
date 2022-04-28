@@ -49,7 +49,7 @@ def get_player(env, agent_type_str:str, path:str) -> ag.MadAgent_v0:
 
 def printif(*args, flag=True):
     if flag:
-        print(*args)
+        print(*args, flush=True)
 
 
 def main():
@@ -81,8 +81,12 @@ def main():
             is_burn_in_episode = True
 
         is_eval_episode = False
+        agent_a.train()
+        agent_b.train()
         if not is_burn_in_episode and episode % args.eval_freq == 0:
             is_eval_episode = True
+            agent_a.eval()
+            agent_b.eval()
         
         PRINT = args.v and is_eval_episode and not is_burn_in_episode
 
