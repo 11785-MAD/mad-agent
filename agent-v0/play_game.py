@@ -11,6 +11,7 @@ import gym_mad
 import agent as ag
 from agent import RandomAgent
 from dqn import DQNAgent
+from observer import Observer
 
 class AgentType(Enum):
     human = auto()
@@ -54,6 +55,7 @@ def printif(*args, flag=True):
 
 def main():
     args = parse_args()
+    observer = Observer()
 
     env = gym.make("mad-v0")
     env.set_config_path(args.env_conf)
@@ -122,6 +124,7 @@ def main():
                 check_nukes = False
 
             time.sleep(args.turn_delay)
+            observer.report(observations,action_vec,reward,new_observations,info,done)
             observations = new_observations
 
             printif(f"End turn {info['turn_count']}\n",flag=PRINT)
