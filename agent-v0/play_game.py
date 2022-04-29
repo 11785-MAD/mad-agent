@@ -127,14 +127,14 @@ def main():
                 check_nukes = False
 
             time.sleep(args.turn_delay)
-            observer.report(observations,action_vec,reward,new_observations,info,done)
+            observer.report_turn(observations,action_vec,reward,new_observations,info,done)
             observations = new_observations
 
             printif(f"End turn {info['turn_count']}\n",flag=PRINT)
 
         # end while not done
         episode += 1
-        printif("episode completed: [" + str(episode) + "/" + str(total_episodes) + "]", flag=True)
+        printif("Episode completed: [" + str(episode) + "/" + str(total_episodes) + "]", flag=True)
         agent_a.report_new_episode()
         agent_b.report_new_episode()
 
@@ -144,8 +144,9 @@ def main():
         if (turn_acquired_nukes != -1):
             num_mad_turns = info['turn_count'] - turn_acquired_nukes
         printif("Turn acquired nukes: " + str(turn_acquired_nukes) + ", num_mad_turns: " + str(num_mad_turns),flag=True)
+        observer.report_episode(turn_acquired_nukes, num_mad_turns)
 
-
+    observer.print_final_stats()
 
 if __name__ == "__main__":
     main()
