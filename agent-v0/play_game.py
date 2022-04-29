@@ -140,7 +140,7 @@ def main():
         printif(f"Game Over! {info['winner']} won!",flag=True)
 
         #observer.report_episode(info, turn_acquired_nukes)
-        printif("Turn acquired nukes: " + str(turn_acquired_nukes) + ", num_mad_turns: " + str(observer.mad_turns[-1]),flag=True)
+        #printif("Turn acquired nukes: " + str(turn_acquired_nukes) + ", num_mad_turns: " + str(observer.mad_turns[-1]),flag=True)
 
     observer.print_final_stats()
 
