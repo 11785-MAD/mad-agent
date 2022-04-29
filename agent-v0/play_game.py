@@ -69,11 +69,10 @@ def main():
 
     check_nukes = True # check if both players have nukes
 
-    turn_acquired_nukes = -1
-
     episode = 0
     is_burn_in_episode = False
     total_episodes = (args.train_episodes * (args.eval_freq+1)) // args.eval_freq
+    sampled_episodes_for_plotting = [0, 500, 1000]
 
     while episode < total_episodes:
 
@@ -127,7 +126,7 @@ def main():
                 check_nukes = False
 
             time.sleep(args.turn_delay)
-            observer.report_turn(observations,action_vec,reward,new_observations,info,done)
+            observer.report_turn(env.S, action_vec, reward, info, done)
             observations = new_observations
 
             printif(f"End turn {info['turn_count']}\n",flag=PRINT)
@@ -140,11 +139,8 @@ def main():
 
         printif(f"Game Over! {info['winner']} won!",flag=True)
 
-        num_mad_turns = 0
-        if (turn_acquired_nukes != -1):
-            num_mad_turns = info['turn_count'] - turn_acquired_nukes
-        printif("Turn acquired nukes: " + str(turn_acquired_nukes) + ", num_mad_turns: " + str(num_mad_turns),flag=True)
-        observer.report_episode(turn_acquired_nukes, num_mad_turns)
+        #observer.report_episode(info, turn_acquired_nukes)
+        printif("Turn acquired nukes: " + str(turn_acquired_nukes) + ", num_mad_turns: " + str(observer.mad_turns[-1]),flag=True)
 
     observer.print_final_stats()
 

@@ -13,9 +13,20 @@ import copy
 import collections
 
 class DeepModel(nn.Module):
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size, output_size, hidden_size=64,num_layers=4):
         super().__init__()
-        self.temp = nn.Linear(input_size, output_size)
+        layers = []
+        for i in range(num_layers):
+            in_size = hidden_size
+            out_size = hidden_size
+            if i == 0: in_size = input_size
+            if i == num_layers -1: out_size = output_size
+
+            layers.append(nn.Linear(in_size, out_size))
+            layers.append(nn.RELU())
+
+        self.layers = nn.Sequential(*layers)
+
         self.input_size = input_size
         self.output_size = output_size
 
@@ -23,7 +34,7 @@ class DeepModel(nn.Module):
         assert len(x.shape) == 1
         assert x.shape[0] == self.input_size
 
-        x = self.temp(x)
+        x = self.layers(x)
         return x
 
 class QNetwork(nn.Module):
@@ -32,11 +43,13 @@ class QNetwork(nn.Module):
     '''
     def __init__(self, input_size, output_size, lr):
         super().__init__()
-        self.model = DeepModel(input_size, output_size)
+        cuda = torch.cuda.is_available()
+        self.device = torch.device("cuda" if cuda else "cpu")
+        self.model = DeepModel(input_size, output_size).to(self.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = lr)
 
     def forward(self, state:np.ndarray) -> torch.Tensor:
-        x = torch.Tensor(state)  # TODO: send to correct device
+        x = torch.Tensor(state).to(self.device)  # TODO: send to correct device
         return self.model(x)
 
     def save_state_dict(self, path:str) -> None:
