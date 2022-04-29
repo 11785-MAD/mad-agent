@@ -92,7 +92,10 @@ def main():
         
         PRINT = args.v and is_eval_episode and not is_burn_in_episode
 
-        
+        observations = env.reset()
+        done = False
+        turn_acquired_nukes = -1
+        check_nukes = True # check if both players have nukes
         while not done:
 
             printif("------------------------------------",flag=PRINT)
@@ -131,15 +134,17 @@ def main():
 
         # end while not done
         episode += 1
+        printif("episode completed: [" + str(episode) + "/" + str(total_episodes) + "]", flag=True)
         agent_a.report_new_episode()
         agent_b.report_new_episode()
 
-        printif(f"Game Over! {info['winner']} won!",flag=PRINT)
+        printif(f"Game Over! {info['winner']} won!",flag=True)
 
         num_mad_turns = 0
         if (turn_acquired_nukes != -1):
             num_mad_turns = info['turn_count'] - turn_acquired_nukes
-        printif("Turn acquired nukes: " + str(turn_acquired_nukes) + ", num_mad_turns: " + str(num_mad_turns),flag=PRINT)
+        printif("Turn acquired nukes: " + str(turn_acquired_nukes) + ", num_mad_turns: " + str(num_mad_turns),flag=True)
+
 
 
 if __name__ == "__main__":
