@@ -127,7 +127,7 @@ def main():
 
         # end while not done
         episode += 1
-        if args.v>=1:
+        if args.v>=1 and not is_burn_in_episode:
             printif("Episode completed: [" + str(episode) + "/" + str(total_episodes) + "]", flag=True)
         agent_a.report_new_episode()
         agent_b.report_new_episode()

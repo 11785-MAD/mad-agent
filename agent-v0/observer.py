@@ -46,7 +46,6 @@ class Observer:
         nuke_indicator = states[nuke_indices,:].sum(axis = 0) # when this is 2, both have nukes
         turns_with_nukes = np.where(nuke_indicator==2)[0]
         if len(turns_with_nukes)>0:
-            print("got nukes")
             turn_acquired_nukes = turns_with_nukes[0]
             self.turns_acquired_nukes.append(turn_acquired_nukes)
             self.mad_turns.append(len(nuke_indicator) - turn_acquired_nukes)
@@ -56,7 +55,7 @@ class Observer:
         
         # plot stuff
         if self.plotting:
-            self.plot_actions_over_episode(show_plot=True)
+            self.plot_actions_over_episode()
 
         # clear stuff
         self.actions_A = [] # list of action indices
@@ -69,17 +68,20 @@ class Observer:
         turns_A = np.arange(len(self.actions_A))
         turns_B = np.arange(len(self.actions_B))
 
-        fig, ax = plt.subplots()       
+        f, (ax1, ax2) = plt.subplots(2, 1, sharey=False,figsize=(15,15))      
         y_tick_pos = np.arange(MadAction_v0.action_size)
         y_tick_labels = MadAction_v0.action_strings
-        ax.set_yticks(y_tick_pos, y_tick_labels)
+        ax1.set_yticks(y_tick_pos, y_tick_labels)
+        ax2.set_yticks(y_tick_pos, y_tick_labels)
         
-        ax.scatter(turns_A, self.actions_A, label="Agent A")
-        ax.scatter(turns_B, self.actions_B, label="Agent B")
-        ax.set_xlabel("Turns")
-        ax.set_ylabel("Action")
-        ax.set_title("Actions Chosen over Time")
-        ax.grid()
+        ax1.scatter(turns_A, self.actions_A, label="Agent A")
+        ax2.scatter(turns_B, self.actions_B, label="Agent B", c="g")
+        ax2.set_xlabel("Turns")
+        ax1.set_title("Agent A Actions")
+        ax1.grid()
+
+        ax2.set_title("Agent B Actions")
+        ax2.grid()
     
         plt.show()
 

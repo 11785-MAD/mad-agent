@@ -11,8 +11,10 @@ import torch.nn as nn
 import numpy as np
 import copy
 import collections
+from tqdm import tqdm
+
 class DeepModel(nn.Module):
-    def __init__(self, input_size, output_size, hidden_size=64,num_layers=4):
+    def __init__(self, input_size, output_size, hidden_size=32,num_layers=3):
         super().__init__()
         layers = []
         for i in range(num_layers):
@@ -22,7 +24,7 @@ class DeepModel(nn.Module):
             if i == num_layers -1: out_size = output_size
 
             layers.append(nn.Linear(in_size, out_size))
-            layers.append(nn.RELU())
+            layers.append(nn.ReLU())
 
         self.layers = nn.Sequential(*layers)
 
@@ -30,9 +32,7 @@ class DeepModel(nn.Module):
         self.output_size = output_size
 
     def forward(self, x:torch.Tensor) -> torch.Tensor:
-        assert len(x.shape) == 1
-        assert x.shape[0] == self.input_size
-
+        assert x.shape[-1] == self.input_size
         x = self.layers(x)
         return x
 
@@ -42,7 +42,7 @@ class QNetwork(nn.Module):
     '''
     def __init__(self, input_size, output_size, lr):
         super().__init__()
-        cuda = torch.cuda.is_available()
+        cuda = torch.cuda.is_available() and False
         self.device = torch.device("cuda" if cuda else "cpu")
         self.model = DeepModel(input_size, output_size).to(self.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = lr)
@@ -101,11 +101,11 @@ class TransitionList():
             is_terminals.append(IT)
 
         return (
-            np.array(states),
-            np.array(actions),
-            np.array(rewards),
-            np.array(next_states),
-            np.array(is_terminals)
+            np.array(states).astype(float),
+            np.array(actions).astype(float),
+            np.array(rewards).astype(float),
+            np.array(next_states).astype(float),
+            np.array(is_terminals).astype(float)
         )
 
 class ReplayBuffer():
@@ -116,6 +116,9 @@ class ReplayBuffer():
         self.buffer_size = buffer_size
         self.batch_size = batch_size
         self.queue = collections.deque(maxlen=buffer_size)
+
+    def __len__(self):
+        return len(self.queue)
 
     def append(self, t:Transition) -> None:
         self.queue.append(t)
@@ -145,7 +148,9 @@ class DQNAgent(agent.MadAgent_v0):
                  discount:float = 0.99,
                  buffer_size:int = 50000,
                  buffer_batch_size:int = 32,
-                 buffer_burn_in:int = 10000,
+                 buffer_burn_in:int = 300,
+                 burn_in_bar = True,
+                 target_update_period = 50,
                  ):
         '''
         Args:
@@ -156,6 +161,7 @@ class DQNAgent(agent.MadAgent_v0):
         super().__init__(observation_size, action_size)
         self.epsilon = epsilon
         self.discount = discount
+        self.target_update_period = target_update_period
 
         self.Q_w = QNetwork(observation_size, action_size, optimizer_lr)
         self.Q_target = QNetwork(observation_size, action_size, optimizer_lr)
@@ -165,6 +171,17 @@ class DQNAgent(agent.MadAgent_v0):
         self.episodes_seen = 0
         self.buffer_burn_in = buffer_burn_in
         self.is_burning_in = buffer_burn_in > 0
+
+        if burn_in_bar:
+            self.burn_in_bar = tqdm(
+                total=self.buffer_burn_in, 
+                dynamic_ncols=True, 
+                leave=True,
+                position=0, 
+                desc=f'DQN BVurn in'
+            )
+        else:
+            self.burn_in_bar = None
 
     def set_Q_target(self):
         self.Q_target.model = copy.deepcopy(self.Q_w.model)
@@ -193,12 +210,12 @@ class DQNAgent(agent.MadAgent_v0):
 
         # Calculate Target
         (max_Q_target, max_indices_Q_target) = torch.max( self.Q_target(next_states), dim=1) # [batch]
-        not_is_terminal_vec = torch.Tensor(np.logical_not(is_terminals).float()) # [batch]
-        target = rewards + torch.mul(self.discount*max_Q_target, not_is_terminal_vec)  # [batch]
+        not_is_terminal_vec = torch.Tensor(np.logical_not(is_terminals)) # [batch]
+        target = torch.from_numpy(rewards) + torch.mul(self.discount*max_Q_target, not_is_terminal_vec)  # [batch]
 
         # Calculate predicted
         q = self.Q_w(states)  # [batch x action_size]
-        (predicted, predicted_indices) = torch.max(q*actions, dim=1)  # [batch]
+        (predicted, predicted_indices) = torch.max(q*torch.from_numpy(actions), dim=1)  # [batch]
 
         # Calculate loss
         loss = torch.nn.functional.mse_loss(target,predicted)  # []
@@ -211,17 +228,22 @@ class DQNAgent(agent.MadAgent_v0):
 
     def report_new_episode(self):
         self.episodes_seen += 1
+        if self.burn_in_bar is not None:
+            self.burn_in_bar.set_postfix(buffer=f"f{len(self.R)}/{self.R.buffer_size}")
+            self.burn_in_bar.update()
         if self.episodes_seen > self.buffer_burn_in and self.is_burning_in:
-            print(f"DQN finished {self.buffer_burn_in} burn in episodes")
             self.is_burning_in = False
             self.c = 0
+            if self.burn_in_bar is not None:
+                self.burn_in_bar.close()
+            print(f"DQN finished {self.buffer_burn_in} burn in episodes")
 
     def choose_action(self, observation):
         assert len(observation) == self.observation_size
         if self.is_burning_in:
             return self.policy_random()
 
-        q_vals = self.Q_w(observation)
+        q_vals = self.Q_w(observation).detach().numpy()
         if self.training:
             return self.policy_epsilon_greedy(q_vals)
 
