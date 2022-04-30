@@ -42,7 +42,7 @@ class QNetwork(nn.Module):
     '''
     def __init__(self, input_size, output_size, lr):
         super().__init__()
-        cuda = torch.cuda.is_available() and False
+        cuda = torch.cuda.is_available()
         self.device = torch.device("cuda" if cuda else "cpu")
         self.model = DeepModel(input_size, output_size).to(self.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = lr)
@@ -178,7 +178,7 @@ class DQNAgent(agent.MadAgent_v0):
                 dynamic_ncols=True, 
                 leave=True,
                 position=0, 
-                desc=f'DQN BVurn in'
+                desc=f'DQN Burn in'
             )
         else:
             self.burn_in_bar = None
@@ -210,12 +210,12 @@ class DQNAgent(agent.MadAgent_v0):
 
         # Calculate Target
         (max_Q_target, max_indices_Q_target) = torch.max( self.Q_target(next_states), dim=1) # [batch]
-        not_is_terminal_vec = torch.Tensor(np.logical_not(is_terminals)) # [batch]
-        target = torch.from_numpy(rewards) + torch.mul(self.discount*max_Q_target, not_is_terminal_vec)  # [batch]
+        not_is_terminal_vec = torch.Tensor(np.logical_not(is_terminals)).to(self.Q_w.device) # [batch]
+        target = torch.from_numpy(rewards).to(self.Q_w.device) + torch.mul(self.discount*max_Q_target, not_is_terminal_vec)  # [batch]
 
         # Calculate predicted
         q = self.Q_w(states)  # [batch x action_size]
-        (predicted, predicted_indices) = torch.max(q*torch.from_numpy(actions), dim=1)  # [batch]
+        (predicted, predicted_indices) = torch.max(q*torch.from_numpy(actions).to(self.Q_w.device), dim=1)  # [batch]
 
         # Calculate loss
         loss = torch.nn.functional.mse_loss(target,predicted)  # []
@@ -229,7 +229,7 @@ class DQNAgent(agent.MadAgent_v0):
     def report_new_episode(self):
         self.episodes_seen += 1
         if self.burn_in_bar is not None:
-            self.burn_in_bar.set_postfix(buffer=f"f{len(self.R)}/{self.R.buffer_size}")
+            self.burn_in_bar.set_postfix(buffer="f{len(self.R)}/{self.R.buffer_size}")
             self.burn_in_bar.update()
         if self.episodes_seen > self.buffer_burn_in and self.is_burning_in:
             self.is_burning_in = False
@@ -243,7 +243,7 @@ class DQNAgent(agent.MadAgent_v0):
         if self.is_burning_in:
             return self.policy_random()
 
-        q_vals = self.Q_w(observation).detach().numpy()
+        q_vals = self.Q_w(observation).detach().cpu().numpy()
         if self.training:
             return self.policy_epsilon_greedy(q_vals)
 
