@@ -229,7 +229,7 @@ class DQNAgent(agent.MadAgent_v0):
     def report_new_episode(self):
         self.episodes_seen += 1
         if self.burn_in_bar is not None:
-            self.burn_in_bar.set_postfix(buffer="f{len(self.R)}/{self.R.buffer_size}")
+            self.burn_in_bar.set_postfix(buffer=f"{len(self.R)}/{self.R.buffer_size}")
             self.burn_in_bar.update()
         if self.episodes_seen > self.buffer_burn_in and self.is_burning_in:
             self.is_burning_in = False
