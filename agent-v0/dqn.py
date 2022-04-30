@@ -11,7 +11,6 @@ import torch.nn as nn
 import numpy as np
 import copy
 import collections
-
 class DeepModel(nn.Module):
     def __init__(self, input_size, output_size, hidden_size=64,num_layers=4):
         super().__init__()

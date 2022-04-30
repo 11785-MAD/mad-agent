@@ -22,6 +22,7 @@ class Observer:
         self.states = [] # list of state vectors
         self.rewards_A = []
         self.rewards_B = []
+        self.plotting = False
 
 
     def report_turn(self, S:MadState_v0, A:np.ndarray, R, info, done):
@@ -32,7 +33,7 @@ class Observer:
         else:
             self.actions_B.append(np.argmax(action.data))
             self.rewards_B.append(R)
-        self.states.append(S.data)
+        self.states.append(S.data.copy())
 
         if done:
             self.episode_finisher()
@@ -45,17 +46,17 @@ class Observer:
         nuke_indicator = states[nuke_indices,:].sum(axis = 0) # when this is 2, both have nukes
         turns_with_nukes = np.where(nuke_indicator==2)[0]
         if len(turns_with_nukes)>0:
+            print("got nukes")
             turn_acquired_nukes = turns_with_nukes[0]
             self.turns_acquired_nukes.append(turn_acquired_nukes)
             self.mad_turns.append(len(nuke_indicator) - turn_acquired_nukes)
             self.mad_episodes += 1
 
         self.episodes += 1
-
+        
         # plot stuff
-        self.plot_actions_over_episode(show_plot=True)
-
-
+        if self.plotting:
+            self.plot_actions_over_episode(show_plot=True)
 
         # clear stuff
         self.actions_A = [] # list of action indices
@@ -64,20 +65,7 @@ class Observer:
         self.rewards_A = []
         self.rewards_B = []
 
-    def report_episode(self, info, turn_acquired_nukes):
-        """
-        turn_acquired_nukes: the first turn when BOTH agents have nukes
-        mad_turns: number of turns passed after both agents after nukes (NOTE: assumes game ends upon nuke firing)
-        """
-        num_mad_turns = 0
-        if (turn_acquired_nukes != -1):
-            num_mad_turns = info['turn_count'] - turn_acquired_nukes
-
-        self.mad_turns.append(num_mad_turns)
-        self.turns_acquired_nukes.append(turn_acquired_nukes)
-        self.episodes = len(self.turns_acquired_nukes)
-
-    def plot_actions_over_episode(self, show_plot=False):
+    def plot_actions_over_episode(self):
         turns_A = np.arange(len(self.actions_A))
         turns_B = np.arange(len(self.actions_B))
 
@@ -93,19 +81,7 @@ class Observer:
         ax.set_title("Actions Chosen over Time")
         ax.grid()
     
-        if (show_plot):
-            plt.show()
-
-    def do_analysis(self):
-        # only compute MAD stats for MAD episodes
-        turns_acquired_nukes_mask = np.array(self.turns_acquired_nukes) != -1
-        valid_mad_turns = np.array(self.mad_turns)[turns_acquired_nukes_mask]
-        valid_turns_acquired_nukes = np.array(self.turns_acquired_nukes)[turns_acquired_nukes_mask]
-
-        self.avg_turns_acquired_nukes = np.sum(valid_turns_acquired_nukes) / len(valid_turns_acquired_nukes)        
-        self.avg_mad_turns = np.sum(valid_mad_turns) / len(valid_mad_turns)
-
-        self.mad_episodes = len(valid_mad_turns)
+        plt.show()
 
     def print_final_stats(self):
         #self.do_analysis()

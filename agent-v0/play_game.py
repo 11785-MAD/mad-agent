@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument('--turn_delay','-d',type=int,default=0)
     parser.add_argument('--train_episodes',type=int,default=1000)
     parser.add_argument('--eval_freq',type=int,default=10)
-    parser.add_argument('-v',action='store_true',help="Verbose")
+    parser.add_argument('-v',action='count',default=0,help="Verbose")
     return parser.parse_args()
 
 def get_player(env, agent_type_str:str, path:str) -> ag.MadAgent_v0:
@@ -67,8 +67,6 @@ def main():
     agent_a = get_player(env, args.agent_a, args.agent_a_path)
     agent_b = get_player(env, args.agent_b, args.agent_b_path)
 
-    check_nukes = True # check if both players have nukes
-
     episode = 0
     is_burn_in_episode = False
     total_episodes = (args.train_episodes * (args.eval_freq+1)) // args.eval_freq
@@ -84,17 +82,18 @@ def main():
         is_eval_episode = False
         agent_a.train()
         agent_b.train()
+        observer.plotting = False
         if not is_burn_in_episode and episode % args.eval_freq == 0:
             is_eval_episode = True
             agent_a.eval()
             agent_b.eval()
+            if args.v>=2: observer.plotting = True
         
-        PRINT = args.v and is_eval_episode and not is_burn_in_episode
+        PRINT = args.v>=3 and is_eval_episode and not is_burn_in_episode
 
         observations = env.reset()
         done = False
-        turn_acquired_nukes = -1
-        check_nukes = True # check if both players have nukes
+
         while not done:
 
             printif("------------------------------------",flag=PRINT)
@@ -120,11 +119,6 @@ def main():
                     observations[env.agent_b],
                     action_vec, reward, new_observations[env.agent_b], done)
 
-            players_have_nukes = env.check_both_nukes()
-            if (check_nukes and players_have_nukes):
-                turn_acquired_nukes = info["turn_count"]
-                check_nukes = False
-
             time.sleep(args.turn_delay)
             observer.report_turn(env.S, action_vec, reward, info, done)
             observations = new_observations
@@ -133,14 +127,13 @@ def main():
 
         # end while not done
         episode += 1
-        printif("Episode completed: [" + str(episode) + "/" + str(total_episodes) + "]", flag=True)
+        if args.v>=1:
+            printif("Episode completed: [" + str(episode) + "/" + str(total_episodes) + "]", flag=True)
         agent_a.report_new_episode()
         agent_b.report_new_episode()
 
-        printif(f"Game Over! {info['winner']} won!",flag=True)
+        printif(f"Game Over! {info['winner']} won!",flag=PRINT)
 
-        #observer.report_episode(info, turn_acquired_nukes)
-        #printif("Turn acquired nukes: " + str(turn_acquired_nukes) + ", num_mad_turns: " + str(observer.mad_turns[-1]),flag=True)
 
     observer.print_final_stats()
 
