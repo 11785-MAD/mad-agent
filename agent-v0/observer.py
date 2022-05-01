@@ -15,6 +15,7 @@ class Observer:
         self.avg_mad_turns = 0
         self.episodes = 0
         self.mad_episodes = 0 # mad_episode := episode when both players had nukes at same time
+        self.fig = None
 
         # per episode records
         self.actions_A = [] # list of action indices
@@ -68,7 +69,9 @@ class Observer:
         turns_A = np.arange(len(self.actions_A))
         turns_B = np.arange(len(self.actions_B))
 
-        f, (ax1, ax2) = plt.subplots(2, 1, sharey=False,figsize=(15,15))      
+        if self.fig is not None:
+            self.fig.close()
+        self.fig, (ax1, ax2) = plt.subplots(2, 1, sharey=False,figsize=(15,15))      
         y_tick_pos = np.arange(MadAction_v0.action_size)
         y_tick_labels = MadAction_v0.action_strings
         ax1.set_yticks(y_tick_pos, y_tick_labels)
