@@ -27,24 +27,49 @@ agent_choices = [name for name, member in AgentType.__members__.items()]
 def parse_args():
     parser = ap.ArgumentParser(description="Script to test an agent in the mad-v0 gym env")
     parser.add_argument('--env_conf',type=str,default="default.json")
+
     parser.add_argument('--agent_a',type=str,choices=agent_choices,default=str(AgentType.random))
     parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.random))
     parser.add_argument('--agent_a_path',type=str,default=None)
     parser.add_argument('--agent_b_path',type=str,default=None)
     parser.add_argument('--turn_delay','-d',type=int,default=0)
+
     parser.add_argument('--train_episodes',type=int,default=1000)
     parser.add_argument('--eval_freq',type=int,default=10)
+
     parser.add_argument('-v',action='count',default=0,help="Verbose")
+
+    parser.add_argument('--dqn_eps', type=float,default=0.05)
+    parser.add_argument('--dqn_lr', type=float,default=5e-4)
+    parser.add_argument('--dqn_discount', type=float, default=0.99)
+    parser.add_argument('--dqn_buffer_size', type=int, default=50000)
+    parser.add_argument('--dqn_buffer_batch', type=int, default=32)
+    parser.add_argument('--dqn_buffer_burn_in', type=int, default=300)
+    parser.add_argument('--no_dqn_burn_in_bar',action='store_false')
+    parser.add_argument('--dqn_target_update_period',type=int,default=50)
+    parser.add_argument('--dqn_model_hidden_size',type=int,default=34)
+    parser.add_argument('--dqn_model_num_layers',type=int,default=3)
     return parser.parse_args()
 
-def get_player(env, agent_type_str:str, path:str) -> ag.MadAgent_v0:
+def get_player(env, agent_type_str:str, path:str, args) -> ag.MadAgent_v0:
     if agent_type_str == str(AgentType.human):
         raise ValueError("Human player not yet implemented")
     elif agent_type_str == str(AgentType.random):
         agent = RandomAgent(env.observation_size, env.action_size)
     elif agent_type_str == str(AgentType.dqn):
-        agent = DQNAgent(env.observation_size, env.action_size)
-
+        agent = DQNAgent(
+                        observation_size = env.observation_size, 
+                        action_size = env.action_size,
+                        epsilon = args.dqn_eps,
+                        optimizer_lr = args.dqn_lr,
+                        discount = args.dqn_discount,
+                        buffer_size = args.dqn_buffer_size,
+                        buffer_batch_size = args.dqn_buffer_batch,
+                        buffer_burn_in = args.dqn_buffer_burn_in,
+                        burn_in_bar = args.no_dqn_burn_in_bar,
+                        target_update_period = args.dqn_target_update_period,
+                        model_hidden_size = args.dqn_model_hidden_size,
+                        model_num_layers = args.dqn_model_num_layers)
     agent.initialize()
     return agent
 
@@ -64,8 +89,8 @@ def main():
 
     # Currently setup for two AI playing against each other
     # Seperate AI for each player
-    agent_a = get_player(env, args.agent_a, args.agent_a_path)
-    agent_b = get_player(env, args.agent_b, args.agent_b_path)
+    agent_a = get_player(env, args.agent_a, args.agent_a_path, args)
+    agent_b = get_player(env, args.agent_b, args.agent_b_path, args)
 
     episode = 0
     is_burn_in_episode = False

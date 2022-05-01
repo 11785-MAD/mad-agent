@@ -14,7 +14,7 @@ import collections
 from tqdm import tqdm
 
 class DeepModel(nn.Module):
-    def __init__(self, input_size, output_size, hidden_size=32,num_layers=3):
+    def __init__(self, input_size, output_size, hidden_size,num_layers):
         super().__init__()
         layers = []
         for i in range(num_layers):
@@ -40,11 +40,11 @@ class QNetwork(nn.Module):
     '''
     Class to be the network that the model uses for Q(s,a)
     '''
-    def __init__(self, input_size, output_size, lr):
+    def __init__(self, input_size, output_size, lr, hidden_size, num_layers):
         super().__init__()
         cuda = torch.cuda.is_available()
         self.device = torch.device("cuda" if cuda else "cpu")
-        self.model = DeepModel(input_size, output_size).to(self.device)
+        self.model = DeepModel(input_size, output_size, hidden_size, num_layers).to(self.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = lr)
 
     def forward(self, state:np.ndarray) -> torch.Tensor:
@@ -151,6 +151,8 @@ class DQNAgent(agent.MadAgent_v0):
                  buffer_burn_in:int = 300,
                  burn_in_bar = True,
                  target_update_period = 50,
+                 model_hidden_size = 34,
+                 model_num_layers = 3,
                  ):
         '''
         Args:
@@ -163,8 +165,8 @@ class DQNAgent(agent.MadAgent_v0):
         self.discount = discount
         self.target_update_period = target_update_period
 
-        self.Q_w = QNetwork(observation_size, action_size, optimizer_lr)
-        self.Q_target = QNetwork(observation_size, action_size, optimizer_lr)
+        self.Q_w = QNetwork(observation_size, action_size, optimizer_lr, model_hidden_size, model_num_layers)
+        self.Q_target = QNetwork(observation_size, action_size, optimizer_lr,model_hidden_size, model_num_layers)
         self.R = ReplayBuffer(buffer_size, buffer_batch_size)
 
         self.c = 0 # Step counter
@@ -175,7 +177,7 @@ class DQNAgent(agent.MadAgent_v0):
         if burn_in_bar:
             self.burn_in_bar = tqdm(
                 total=self.buffer_burn_in, 
-                dynamic_ncols=True, 
+                dynamic_ncols=False, 
                 leave=True,
                 position=0, 
                 desc=f'DQN Burn in'
@@ -229,7 +231,7 @@ class DQNAgent(agent.MadAgent_v0):
     def report_new_episode(self):
         self.episodes_seen += 1
         if self.burn_in_bar is not None:
-            self.burn_in_bar.set_postfix(buffer="f{len(self.R)}/{self.R.buffer_size}")
+            self.burn_in_bar.set_postfix(buffer=f"{len(self.R)}/{self.R.buffer_size}")
             self.burn_in_bar.update()
         if self.episodes_seen > self.buffer_burn_in and self.is_burning_in:
             self.is_burning_in = False
