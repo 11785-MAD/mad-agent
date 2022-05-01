@@ -70,8 +70,7 @@ class Observer:
         turns_A = np.arange(len(self.actions_A))
         turns_B = np.arange(len(self.actions_B))
 
-        if self.fig is not None:
-            self.fig.close()
+        plt.close('all')
         self.fig, (ax1, ax2) = plt.subplots(2, 1, sharey=False,figsize=(15,15))      
         y_tick_pos = np.arange(MadAction_v0.action_size)
         y_tick_labels = MadAction_v0.action_strings
