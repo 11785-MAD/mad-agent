@@ -59,6 +59,7 @@ class Observer:
             self.print_action_histograms()
             self.plot_actions_over_episode()
             self.plot_stats_over_episode(states)
+            self.plot_reward_over_episode()
 
         # clear stuff
         self.actions_A = [] # list of action indices
@@ -66,6 +67,26 @@ class Observer:
         self.states = [] # list of state vectors
         self.rewards_A = []
         self.rewards_B = []
+
+    def plot_reward_over_episode(self):
+        turns_A = np.arange(len(self.actions_A))
+        turns_B = np.arange(len(self.actions_B))
+
+        cum_rewards_A = np.cumsum(np.array(self.rewards_A))
+        cum_rewards_B = np.cumsum(np.array(self.rewards_B))
+
+        plt.close('all')
+        self.fig, (ax1) = plt.subplots(1, 1, sharey=False,figsize=(15,15))      
+
+        ax1.set_title("Cumulative Rewards over Time")
+        ax1.plot(turns_A, cum_rewards_A, label="Agent A")
+        ax1.plot(turns_B, cum_rewards_B, label="Agent B")
+        ax1.set_ylabel("Cumulative Reward")
+        ax1.set_xlabel("Turns")
+        ax1.legend()
+        ax1.grid()
+
+        plt.show()
 
     def plot_stats_over_episode(self, states_np_array):
         turns_A = np.arange(len(self.actions_A))
