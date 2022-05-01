@@ -40,9 +40,9 @@ class QNetwork(nn.Module):
     '''
     Class to be the network that the model uses for Q(s,a)
     '''
-    def __init__(self, input_size, output_size, lr, hidden_size, num_layers):
+    def __init__(self, input_size, output_size, lr, hidden_size, num_layers, no_cuda):
         super().__init__()
-        cuda = torch.cuda.is_available()
+        cuda = torch.cuda.is_available() and not no_cuda
         self.device = torch.device("cuda" if cuda else "cpu")
         self.model = DeepModel(input_size, output_size, hidden_size, num_layers).to(self.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = lr)
@@ -153,6 +153,7 @@ class DQNAgent(agent.MadAgent_v0):
                  target_update_period = 50,
                  model_hidden_size = 34,
                  model_num_layers = 3,
+                 no_cuda = False,
                  ):
         '''
         Args:
@@ -165,8 +166,8 @@ class DQNAgent(agent.MadAgent_v0):
         self.discount = discount
         self.target_update_period = target_update_period
 
-        self.Q_w = QNetwork(observation_size, action_size, optimizer_lr, model_hidden_size, model_num_layers)
-        self.Q_target = QNetwork(observation_size, action_size, optimizer_lr,model_hidden_size, model_num_layers)
+        self.Q_w = QNetwork(observation_size, action_size, optimizer_lr, model_hidden_size, model_num_layers, no_cuda)
+        self.Q_target = QNetwork(observation_size, action_size, optimizer_lr,model_hidden_size, model_num_layers, no_cuda)
         self.R = ReplayBuffer(buffer_size, buffer_batch_size)
 
         self.c = 0 # Step counter

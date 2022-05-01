@@ -49,6 +49,7 @@ def parse_args():
     parser.add_argument('--dqn_target_update_period',type=int,default=50)
     parser.add_argument('--dqn_model_hidden_size',type=int,default=34)
     parser.add_argument('--dqn_model_num_layers',type=int,default=3)
+    parser.add_argument('--no_cuda', action="store_true")
     return parser.parse_args()
 
 def get_player(env, agent_type_str:str, path:str, args) -> ag.MadAgent_v0:
@@ -69,7 +70,8 @@ def get_player(env, agent_type_str:str, path:str, args) -> ag.MadAgent_v0:
                         burn_in_bar = args.no_dqn_burn_in_bar,
                         target_update_period = args.dqn_target_update_period,
                         model_hidden_size = args.dqn_model_hidden_size,
-                        model_num_layers = args.dqn_model_num_layers)
+                        model_num_layers = args.dqn_model_num_layers,
+                        no_cuda = args.no_cuda)
     agent.initialize()
     return agent
 
