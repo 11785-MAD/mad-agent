@@ -58,9 +58,6 @@ class Observer:
         if self.plotting:
             self.print_action_histograms()
             self.plot_stuff(states)
-            # self.plot_actions_over_episode()
-            # self.plot_stats_over_episode(states)
-            # self.plot_reward_over_episode()
 
         # clear stuff
         self.actions_A = [] # list of action indices
@@ -71,10 +68,11 @@ class Observer:
         
     def plot_stuff(self, states_np_array):
         plt.close('all')
-        self.fig, ax_arr = plt.subplots(3, 2, sharey=False,figsize=(15,30))  
+        self.fig, ax_arr = plt.subplots(4, 2, sharey=False,figsize=(15,30))  
         self.plot_actions_over_episode(ax_arr[0,0], ax_arr[0,1])
         self.plot_stats_over_episode(states_np_array, ax_arr[1,0], ax_arr[1,1], ax_arr[2,0])
-        self.plot_reward_over_episode(ax_arr[2,1])
+        self.plot_agent_cum_reward_over_episode(ax_arr[2,1])
+        self.plot_reward_all_actions(ax_arr[3,0], ax_arr[3,1])
         
         plt.show()
         
@@ -129,7 +127,7 @@ class Observer:
         ax4.legend()
         ax4.grid()
 
-    def plot_reward_over_episode(self, ax6):
+    def plot_agent_cum_reward_over_episode(self, ax6):
         turns_A = np.arange(len(self.actions_A))
         turns_B = np.arange(len(self.actions_B))
 
@@ -142,6 +140,12 @@ class Observer:
         ax6.set_ylabel("Cumulative Reward")
         ax6.legend()
         ax6.grid()
+        
+    def plot_reward_all_actions(self, ax7, ax8):
+        turns_A = np.arange(len(self.actions_A))
+        turns_B = np.arange(len(self.actions_B))
+        pass
+        # TODO:
 
     def print_final_stats(self):
         #self.do_analysis()
