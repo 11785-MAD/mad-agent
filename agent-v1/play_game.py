@@ -42,7 +42,7 @@ def parse_args():
     parser.add_argument('-v',action='count',default=0,help="Verbose")
 
     parser.add_argument('--dqn_eps', type=float,default=0.1)
-    parser.add_argument('--dqn_lr', type=float,default=0.04)
+    parser.add_argument('--dqn_lr', type=float,default=0.0001)
     parser.add_argument('--dqn_discount', type=float, default=0.99)
     parser.add_argument('--dqn_buffer_size', type=int, default=50000)
     parser.add_argument('--dqn_buffer_batch', type=int, default=64)

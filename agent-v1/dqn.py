@@ -271,6 +271,7 @@ class DQNAgent(agent.MadAgent_v1):
         self.Q_w.optimizer.zero_grad()
         L = self.loss(transitions)
         L.backward()
+        print(L.item())
         self.Q_w.optimizer.step()
         self.Q_w.eval()
 
