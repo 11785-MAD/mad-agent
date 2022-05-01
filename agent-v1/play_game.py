@@ -12,6 +12,7 @@ import agent as ag
 from agent import RandomAgent
 from dqn import DQNAgent
 from observer import Observer
+import torch
 
 class AgentType(Enum):
     human = auto()
@@ -34,16 +35,17 @@ def parse_args():
     parser.add_argument('--agent_b_path',type=str,default=None)
     parser.add_argument('--turn_delay','-d',type=float,default=0)
 
+    parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--train_episodes',type=int,default=1000)
     parser.add_argument('--eval_freq',type=int,default=4)
 
     parser.add_argument('-v',action='count',default=0,help="Verbose")
 
     parser.add_argument('--dqn_eps', type=float,default=0.1)
-    parser.add_argument('--dqn_lr', type=float,default=0.02)
+    parser.add_argument('--dqn_lr', type=float,default=0.04)
     parser.add_argument('--dqn_discount', type=float, default=0.99)
     parser.add_argument('--dqn_buffer_size', type=int, default=50000)
-    parser.add_argument('--dqn_buffer_batch', type=int, default=32)
+    parser.add_argument('--dqn_buffer_batch', type=int, default=64)
     parser.add_argument('--dqn_buffer_burn_in', type=int, default=300)
     parser.add_argument('--no_dqn_burn_in_bar',action='store_false')
     parser.add_argument('--dqn_target_update_period',type=int,default=50)
@@ -82,12 +84,16 @@ def printif(*args, flag=True):
 
 def main():
     args = parse_args()
-    observer = Observer()
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+
 
     env = gym.make("mad-v1")
     env.set_config_path(args.env_conf)
     observations = env.reset()
     done = False
+
+    observer = Observer(C=env.config)
 
     # Currently setup for two AI playing against each other
     # Seperate AI for each player

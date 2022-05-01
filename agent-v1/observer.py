@@ -1,13 +1,15 @@
 import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
-from gym_mad.envs.mad_env_v1 import MadEnv_v1, MadState_v1, MadAction_v1
+from gym_mad.envs.mad_env_v1 import MadEnv_v1, MadState_v1, MadAction_v1, MadGameConfig_v1
+from agent import one_hot
 
 class Observer:
     """
     Class for observing the entire game state.
     """
-    def __init__(self, episode_plot_period=100):
+    def __init__(self, episode_plot_period=100, C:MadGameConfig_v1=None):
+        self.config = C
         self.epsiode_plot_period = episode_plot_period
         self.mad_turns = []
         self.turns_acquired_nukes = []
@@ -151,6 +153,21 @@ class Observer:
         ax2.grid()
     
         plt.show()
+
+    def plot_rewards_per_state(self):
+        A_rewards = np.zeros((MadAction_v1.action_size,len(self.actions_A)))
+        B_rewards = np.zeros((MadAction_v1.action_size,len(self.actions_B)))
+
+        for i, data in enumerate(self.states):
+            turn_a = i % 2
+            
+            for A_idx in range(MadAction_v1.action_size):
+                A = MadAction_v1(one_hot(A_idx))
+                reward, done, winner, info = A.apply_dynamics(data.copy())
+                if turn_a:
+                    A_rewards[A_idx,i/2] = reward
+                else:
+                    B_rewards[A_idx,i/2] = reward
 
     def print_final_stats(self):
         #self.do_analysis()
