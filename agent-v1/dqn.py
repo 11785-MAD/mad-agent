@@ -134,7 +134,7 @@ class ReplayBuffer():
         batch_size = min(batch_size, len(self.queue))
 
         # TODO: use random.choice instead
-        indices = np.random.randint(low=0, high=len(self.queue), size=batch_size)
+        indices = np.random.choice(len(self.queue), size=batch_size, replace = False)
         transitions = TransitionList()
 
         for i in indices:

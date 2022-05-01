@@ -59,9 +59,7 @@ class Observer:
         # plot stuff
         if self.plotting:
             self.print_action_histograms()
-            self.plot_actions_over_episode()
-            self.plot_stats_over_episode(states)
-            self.plot_reward_over_episode()
+            self.plot_stuff(states)
 
         # clear stuff
         self.actions_A = [] # list of action indices
@@ -69,30 +67,36 @@ class Observer:
         self.states = [] # list of state vectors
         self.rewards_A = []
         self.rewards_B = []
-
-    def plot_reward_over_episode(self):
+        
+    def plot_stuff(self, states_np_array):
+        plt.close('all')
+        self.fig, ax_arr = plt.subplots(4, 2, sharey=False,figsize=(15,30))  
+        self.plot_actions_over_episode(ax_arr[0,0], ax_arr[0,1])
+        self.plot_stats_over_episode(states_np_array, ax_arr[1,0], ax_arr[1,1], ax_arr[2,0])
+        self.plot_agent_cum_reward_over_episode(ax_arr[2,1])
+        self.plot_reward_all_actions(ax_arr[3,0], ax_arr[3,1])
+        
+        plt.show()
+        
+    def plot_actions_over_episode(self, ax1, ax2):
         turns_A = np.arange(len(self.actions_A))
         turns_B = np.arange(len(self.actions_B))
 
-        cum_rewards_A = np.cumsum(np.array(self.rewards_A))
-        cum_rewards_B = np.cumsum(np.array(self.rewards_B))
-
-        plt.close('all')
-        self.fig, (ax1) = plt.subplots(1, 1, sharey=False,figsize=(15,15))      
-
-        ax1.set_title("Cumulative Rewards over Time")
-        ax1.plot(turns_A, cum_rewards_A, label="Agent A")
-        ax1.plot(turns_B, cum_rewards_B, label="Agent B")
-        ax1.set_ylabel("Cumulative Reward")
-        ax1.set_xlabel("Turns")
-        ax1.legend()
+        y_tick_pos = np.arange(MadAction_v1.action_size)
+        y_tick_labels = MadAction_v1.action_strings
+        ax1.set_yticks(y_tick_pos, y_tick_labels)
+        ax2.set_yticks(y_tick_pos, y_tick_labels)
+        
+        ax1.scatter(turns_A, self.actions_A, label="Agent A")
+        ax2.scatter(turns_B, self.actions_B, label="Agent B", c="g")
+        # ax2.set_xticks(turns_B, minor=True)
+        ax1.set_title("Agent A Actions")
         ax1.grid()
 
-        plt.show()
-
-    def plot_stats_over_episode(self, states_np_array):
-        turns_A = np.arange(len(self.actions_A))
-        turns_B = np.arange(len(self.actions_B))
+        ax2.set_title("Agent B Actions")
+        ax2.grid()
+    
+    def plot_stats_over_episode(self, states_np_array, ax3, ax4, ax5):
         turns_all = np.arange(len(self.actions_A) + len(self.actions_B))
 
         cash_a = states_np_array[MadState_v1.idx_cash_a, :]
@@ -104,55 +108,46 @@ class Observer:
         income_a = states_np_array[MadState_v1.idx_income_a, :]
         income_b = states_np_array[MadState_v1.idx_income_b, :]
 
-        plt.close('all')
-        self.fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharey=False,figsize=(15,15))      
-
-        ax1.set_title("Cash over Time")
-        ax1.plot(turns_all, cash_a, label="Agent A")
-        ax1.plot(turns_all, cash_b, label="Agent B")
-        ax1.set_ylabel("Cash")
-        ax1.legend()
-        ax1.grid()
-
-        ax2.set_title("Income over Time")
-        ax2.plot(turns_all, income_a, label="Agent A")
-        ax2.plot(turns_all, income_b, label="Agent B")
-        ax2.set_ylabel("Income")
-        ax2.legend()
-        ax2.grid()
-
-        ax3.set_title("Military over Time")
-        ax3.plot(turns_all, military_a, label="Agent A")
-        ax3.plot(turns_all, military_b, label="Agent B")
-        ax3.set_ylabel("Military")
-        ax3.set_xlabel("Turns")
+        ax3.set_title("Cash over Time")
+        ax3.plot(turns_all, cash_a, label="Agent A")
+        ax3.plot(turns_all, cash_b, label="Agent B")
+        ax3.set_ylabel("Cash")
         ax3.legend()
         ax3.grid()
 
-        plt.show()
+        ax5.set_title("Income over Time")
+        ax5.plot(turns_all, income_a, label="Agent A")
+        ax5.plot(turns_all, income_b, label="Agent B")
+        ax5.set_ylabel("Income")
+        ax5.legend()
+        ax5.grid()
 
-    def plot_actions_over_episode(self):
+        ax4.set_title("Military over Time")
+        ax4.plot(turns_all, military_a, label="Agent A")
+        ax4.plot(turns_all, military_b, label="Agent B")
+        ax4.set_ylabel("Military")
+        ax4.legend()
+        ax4.grid()
+
+    def plot_agent_cum_reward_over_episode(self, ax6):
         turns_A = np.arange(len(self.actions_A))
         turns_B = np.arange(len(self.actions_B))
 
-        plt.close('all')
-        self.fig, (ax1, ax2) = plt.subplots(2, 1, sharey=False,figsize=(15,15))      
-        y_tick_pos = np.arange(MadAction_v1.action_size)
-        y_tick_labels = MadAction_v1.action_strings
-        ax1.set_yticks(y_tick_pos, y_tick_labels)
-        ax2.set_yticks(y_tick_pos, y_tick_labels)
-        
-        ax1.scatter(turns_A, self.actions_A, label="Agent A")
-        ax2.scatter(turns_B, self.actions_B, label="Agent B", c="g")
-        ax2.set_xlabel("Turns")
-        # ax2.set_xticks(turns_B, minor=True)
-        ax1.set_title("Agent A Actions")
-        ax1.grid()
+        cum_rewards_A = np.cumsum(np.array(self.rewards_A))
+        cum_rewards_B = np.cumsum(np.array(self.rewards_B))
 
-        ax2.set_title("Agent B Actions")
-        ax2.grid()
-    
-        plt.show()
+        ax6.set_title("Cumulative Rewards over Time")
+        ax6.plot(turns_A, cum_rewards_A, label="Agent A")
+        ax6.plot(turns_B, cum_rewards_B, label="Agent B")
+        ax6.set_ylabel("Cumulative Reward")
+        ax6.legend()
+        ax6.grid()
+        
+    def plot_reward_all_actions(self, ax7, ax8):
+        turns_A = np.arange(len(self.actions_A))
+        turns_B = np.arange(len(self.actions_B))
+        pass
+        # TODO:
 
     def plot_rewards_per_state(self):
         A_rewards = np.zeros((MadAction_v1.action_size,len(self.actions_A)))
