@@ -115,6 +115,7 @@ def main():
             if args.v>=2: observer.plotting = True
         
         PRINT = args.v>=3 and is_eval_episode and not is_burn_in_episode
+        env.set_show_bar(show=not is_burn_in_episode and args.v >=1, e = episode)
 
         observations = env.reset()
         done = False
@@ -152,8 +153,8 @@ def main():
 
         # end while not done
         episode += 1
-        if args.v>=1 and not is_burn_in_episode:
-            printif("Episode completed: [" + str(episode) + "/" + str(total_episodes) + "]", flag=True)
+        # if args.v>=1 and not is_burn_in_episode:
+        #     printif("Episode completed: [" + str(episode) + "/" + str(total_episodes) + "]", flag=True)
         agent_a.report_new_episode()
         agent_b.report_new_episode()
 

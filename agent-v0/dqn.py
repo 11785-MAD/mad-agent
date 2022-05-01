@@ -179,7 +179,7 @@ class DQNAgent(agent.MadAgent_v0):
                 total=self.buffer_burn_in, 
                 dynamic_ncols=False, 
                 leave=True,
-                position=0, 
+                # position=0, 
                 desc=f'DQN Burn in'
             )
         else:
