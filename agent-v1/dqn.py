@@ -252,6 +252,7 @@ class DQNAgent(agent.MadAgent_v1):
             return self.policy_random()
 
         q_vals = self.Q_w(observation).detach().cpu().numpy()
+        print(q_vals)
         if self.training:
             return self.policy_epsilon_greedy(q_vals)
 
@@ -260,13 +261,14 @@ class DQNAgent(agent.MadAgent_v1):
     def report_SARS(self, observation, action, reward, new_observation, is_terminal):
         if not self.training:
             return
-
         t = Transition(observation, action, reward/1000, new_observation, is_terminal)
         self.R.append(t)
-
+        
         if self.is_burning_in:
             return
-
+        # self.baseline = [T.reward for T in self.R.queue]
+        # self.baseline = np.mean(self.baseline)
+        # print("set baseline to ", self.baseline)
         self.Q_w.train()
         transitions = self.R.sample_batch()
         self.Q_w.optimizer.zero_grad()
