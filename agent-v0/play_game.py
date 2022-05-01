@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument('--turn_delay','-d',type=int,default=0)
 
     parser.add_argument('--train_episodes',type=int,default=1000)
-    parser.add_argument('--eval_freq',type=int,default=10)
+    parser.add_argument('--eval_freq',type=int,default=4)
 
     parser.add_argument('-v',action='count',default=0,help="Verbose")
 
@@ -161,6 +161,10 @@ def main():
         agent_b.report_new_episode()
 
         printif(f"Game Over! {info['winner']} won!",flag=PRINT)
+
+    if args.v >= 2:
+        print("Final State:")
+        env.render()
 
 
     observer.print_final_stats()

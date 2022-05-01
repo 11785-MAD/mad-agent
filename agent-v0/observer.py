@@ -55,6 +55,7 @@ class Observer:
         
         # plot stuff
         if self.plotting:
+            self.print_action_histograms()
             self.plot_actions_over_episode()
 
         # clear stuff
@@ -91,3 +92,25 @@ class Observer:
         print("Total MAD episodes:", self.mad_episodes)
         print("Average turn acquired nukes:", np.mean(self.turns_acquired_nukes))
         print("Average MAD turns:", np.mean(self.mad_turns))
+
+    def get_action_histogram(self):
+        A_hist = {}
+        for idx in self.actions_A:
+            if idx in A_hist:
+                A_hist[idx] += 1
+            else:
+                A_hist[idx] = 1
+
+        B_hist = {}
+        for idx in self.actions_B:
+            if idx in B_hist:
+                B_hist[idx] += 1
+            else:
+                B_hist[idx] = 1
+
+        return A_hist, B_hist
+
+    def print_action_histograms(self):
+        A, B = self.get_action_histogram()
+        print(f"A ac hist: {A}")
+        print(f"B ac hist: {B}")

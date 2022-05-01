@@ -178,7 +178,7 @@ class DQNAgent(agent.MadAgent_v0):
         if burn_in_bar:
             self.burn_in_bar = tqdm(
                 total=self.buffer_burn_in, 
-                dynamic_ncols=False, 
+                dynamic_ncols=True, 
                 leave=True,
                 # position=0, 
                 desc=f'DQN Burn in'
