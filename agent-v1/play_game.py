@@ -32,14 +32,14 @@ def parse_args():
     parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.random))
     parser.add_argument('--agent_a_path',type=str,default=None)
     parser.add_argument('--agent_b_path',type=str,default=None)
-    parser.add_argument('--turn_delay','-d',type=int,default=0)
+    parser.add_argument('--turn_delay','-d',type=float,default=0)
 
     parser.add_argument('--train_episodes',type=int,default=1000)
     parser.add_argument('--eval_freq',type=int,default=4)
 
     parser.add_argument('-v',action='count',default=0,help="Verbose")
 
-    parser.add_argument('--dqn_eps', type=float,default=0.05)
+    parser.add_argument('--dqn_eps', type=float,default=0.1)
     parser.add_argument('--dqn_lr', type=float,default=0.02)
     parser.add_argument('--dqn_discount', type=float, default=0.99)
     parser.add_argument('--dqn_buffer_size', type=int, default=50000)
@@ -47,7 +47,7 @@ def parse_args():
     parser.add_argument('--dqn_buffer_burn_in', type=int, default=300)
     parser.add_argument('--no_dqn_burn_in_bar',action='store_false')
     parser.add_argument('--dqn_target_update_period',type=int,default=50)
-    parser.add_argument('--dqn_model_hidden_size',type=int,default=34)
+    parser.add_argument('--dqn_model_hidden_size',type=int,default=32)
     parser.add_argument('--dqn_model_num_layers',type=int,default=3)
     parser.add_argument('--no_cuda', action="store_true")
     return parser.parse_args()

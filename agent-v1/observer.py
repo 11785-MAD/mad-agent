@@ -58,6 +58,7 @@ class Observer:
         if self.plotting:
             self.print_action_histograms()
             self.plot_actions_over_episode()
+            self.plot_stats_over_episode(states)
 
         # clear stuff
         self.actions_A = [] # list of action indices
@@ -65,6 +66,47 @@ class Observer:
         self.states = [] # list of state vectors
         self.rewards_A = []
         self.rewards_B = []
+
+    def plot_stats_over_episode(self, states_np_array):
+        turns_A = np.arange(len(self.actions_A))
+        turns_B = np.arange(len(self.actions_B))
+        turns_all = np.arange(len(self.actions_A) + len(self.actions_B))
+
+        cash_a = states_np_array[MadState_v1.idx_cash_a, :]
+        cash_b = states_np_array[MadState_v1.idx_cash_b, :]
+
+        military_a = states_np_array[MadState_v1.idx_military_a, :]
+        military_b = states_np_array[MadState_v1.idx_military_b, :]
+
+        income_a = states_np_array[MadState_v1.idx_income_a, :]
+        income_b = states_np_array[MadState_v1.idx_income_b, :]
+
+        plt.close('all')
+        self.fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharey=False,figsize=(15,15))      
+
+        ax1.set_title("Cash over Time")
+        ax1.plot(turns_all, cash_a, label="Agent A")
+        ax1.plot(turns_all, cash_b, label="Agent B")
+        ax1.set_ylabel("Cash")
+        ax1.legend()
+        ax1.grid()
+
+        ax2.set_title("Income over Time")
+        ax2.plot(turns_all, income_a, label="Agent A")
+        ax2.plot(turns_all, income_b, label="Agent B")
+        ax2.set_ylabel("Income")
+        ax2.legend()
+        ax2.grid()
+
+        ax3.set_title("Military over Time")
+        ax3.plot(turns_all, military_a, label="Agent A")
+        ax3.plot(turns_all, military_b, label="Agent B")
+        ax3.set_ylabel("Military")
+        ax3.set_xlabel("Turns")
+        ax3.legend()
+        ax3.grid()
+
+        plt.show()
 
     def plot_actions_over_episode(self):
         turns_A = np.arange(len(self.actions_A))
@@ -80,6 +122,7 @@ class Observer:
         ax1.scatter(turns_A, self.actions_A, label="Agent A")
         ax2.scatter(turns_B, self.actions_B, label="Agent B", c="g")
         ax2.set_xlabel("Turns")
+        # ax2.set_xticks(turns_B, minor=True)
         ax1.set_title("Agent A Actions")
         ax1.grid()
 
@@ -97,18 +140,17 @@ class Observer:
 
     def get_action_histogram(self):
         A_hist = {}
-        for idx in self.actions_A:
-            if idx in A_hist:
-                A_hist[idx] += 1
-            else:
-                A_hist[idx] = 1
-
         B_hist = {}
+
+        for a in MadAction_v1.action_strings_short:
+            A_hist[a] = 0
+            B_hist[a] = 0
+
+        for idx in self.actions_A:
+            A_hist[MadAction_v1.action_strings_short[idx]] += 1
+
         for idx in self.actions_B:
-            if idx in B_hist:
-                B_hist[idx] += 1
-            else:
-                B_hist[idx] = 1
+            B_hist[MadAction_v1.action_strings_short[idx]] += 1
 
         return A_hist, B_hist
 

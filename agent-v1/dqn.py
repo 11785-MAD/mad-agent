@@ -26,7 +26,7 @@ class DeepModel(nn.Module):
             layers.append(nn.Linear(in_size, out_size))
             layers.append(nn.ReLU())
 
-        self.layers = nn.Sequential(*layers)
+        self.layers = nn.Sequential(*layers[:-1])
 
         self.input_size = input_size
         self.output_size = output_size
@@ -46,6 +46,7 @@ class QNetwork(nn.Module):
         self.device = torch.device("cuda" if cuda else "cpu")
         self.model = DeepModel(input_size, output_size, hidden_size, num_layers).to(self.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = lr)
+        print(self.model)
 
     def forward(self, state:np.ndarray) -> torch.Tensor:
         x = torch.Tensor(state).to(self.device)  # TODO: send to correct device
@@ -151,7 +152,7 @@ class DQNAgent(agent.MadAgent_v1):
                  buffer_burn_in:int = 300,
                  burn_in_bar = True,
                  target_update_period = 50,
-                 model_hidden_size = 34,
+                 model_hidden_size = 32,
                  model_num_layers = 3,
                  no_cuda = False,
                  ):
