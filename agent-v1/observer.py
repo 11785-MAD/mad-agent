@@ -71,6 +71,7 @@ class Observer:
     def plot_stuff(self, states_np_array):
         plt.close('all')
         self.fig, ax_arr = plt.subplots(4, 2, sharey=False,figsize=(15,30))  
+        self.fig.subplots_adjust(hspace=0.4, wspace=0.2)
         self.plot_actions_over_episode(ax_arr[0,0], ax_arr[0,1])
         self.plot_stats_over_episode(states_np_array, ax_arr[1,0], ax_arr[1,1], ax_arr[2,0])
         self.plot_agent_cum_reward_over_episode(ax_arr[2,1])
