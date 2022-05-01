@@ -226,7 +226,7 @@ class DQNAgent(agent.MadAgent_v1):
 
         # Calculate loss
         loss = torch.nn.functional.mse_loss(target,predicted)  # []
-        self.last_loss = loss.item()
+        self.last_loss = loss.detach().cpu().item()
 
         return loss
     
@@ -261,7 +261,7 @@ class DQNAgent(agent.MadAgent_v1):
     def report_SARS(self, observation, action, reward, new_observation, is_terminal):
         if not self.training:
             return
-        t = Transition(observation, action, reward/1000, new_observation, is_terminal)
+        t = Transition(observation, action, reward, new_observation, is_terminal)
         self.R.append(t)
         
         if self.is_burning_in:
