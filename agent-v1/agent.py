@@ -12,6 +12,7 @@ class MadAgent_v1(nn.Module):
         self.observation_size = observation_size
         self.action_size = action_size
         self.is_burning_in = False
+        self.last_loss = 0.0
 
     def forward(self, x):
         return self.choose_action(x)

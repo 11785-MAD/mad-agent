@@ -226,6 +226,7 @@ class DQNAgent(agent.MadAgent_v1):
 
         # Calculate loss
         loss = torch.nn.functional.mse_loss(target,predicted)  # []
+        self.last_loss = loss.item()
 
         return loss
     
@@ -260,7 +261,7 @@ class DQNAgent(agent.MadAgent_v1):
         if not self.training:
             return
 
-        t = Transition(observation, action, reward, new_observation, is_terminal)
+        t = Transition(observation, action, reward/1000, new_observation, is_terminal)
         self.R.append(t)
 
         if self.is_burning_in:
@@ -271,7 +272,7 @@ class DQNAgent(agent.MadAgent_v1):
         self.Q_w.optimizer.zero_grad()
         L = self.loss(transitions)
         L.backward()
-        print(L.item())
+
         self.Q_w.optimizer.step()
         self.Q_w.eval()
 

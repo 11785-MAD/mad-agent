@@ -134,6 +134,8 @@ def main():
             printif(f"Begin {env.current_player}'s turn",flag=PRINT)
             if env.current_player == env.agent_a:
                 action_vec = agent_a(observations[env.agent_a])
+                bar_postfix=f'L=[{agent_a.last_loss:0.0f},{agent_b.last_loss:0.0f}], '
+                env.set_bar_postfix(bar_postfix)
                 new_observations, reward, done, info = env.step(action_vec)
                 printif(f"Player took action {info['action'].action_str}",flag=PRINT)
                 printif(info["turn_desc"],flag=PRINT)
@@ -144,6 +146,8 @@ def main():
                     action_vec, reward, new_observations[env.agent_a], done)
             else:
                 action_vec = agent_b(observations[env.agent_b])
+                bar_postfix=f'L=[{agent_a.last_loss:0.0f},{agent_b.last_loss:0.0f}], '
+                env.set_bar_postfix(bar_postfix)
                 new_observations, reward, done, info = env.step(action_vec)
                 printif(f"Player took action {info['action'].action_str}",flag=PRINT)
                 printif(info["turn_desc"],flag=PRINT)
@@ -152,6 +156,7 @@ def main():
                 agent_b.report_SARS(
                     observations[env.agent_b],
                     action_vec, reward, new_observations[env.agent_b], done)
+
 
             time.sleep(args.turn_delay)
             observer.report_turn(env.S, action_vec, reward, info, done)
