@@ -144,25 +144,34 @@ class Observer:
         ax6.grid()
         
     def plot_reward_all_actions(self, ax7, ax8):
-        turns_A = np.arange(len(self.actions_A))
-        turns_B = np.arange(len(self.actions_B))
-        pass
-        # TODO:
-
-    def plot_rewards_per_state(self):
         A_rewards = np.zeros((MadAction_v1.action_size,len(self.actions_A)))
         B_rewards = np.zeros((MadAction_v1.action_size,len(self.actions_B)))
+        S = MadState_v1(self.config)
 
         for i, data in enumerate(self.states):
             turn_a = i % 2
             
             for A_idx in range(MadAction_v1.action_size):
-                A = MadAction_v1(one_hot(A_idx))
-                reward, done, winner, info = A.apply_dynamics(data.copy())
+                A = MadAction_v1(one_hot(MadAction_v1.action_size, A_idx))
+                S.data = data.copy()
                 if turn_a:
-                    A_rewards[A_idx,i/2] = reward
+                    reward, done, winner, info = A.apply_dynamics(S, self.config)
+                    A_rewards[A_idx,i//2] = reward
                 else:
-                    B_rewards[A_idx,i/2] = reward
+                    S.swap_agents()
+                    reward, done, winner, info = A.apply_dynamics(S, self.config)
+                    B_rewards[A_idx,(i-1)//2] = reward
+
+        for A_idx in range(MadAction_v1.action_size):
+            ax7.plot(np.arange(len(self.actions_A)),A_rewards[A_idx,:],label=MadAction_v1.action_strings[A_idx])
+            ax8.plot(np.arange(len(self.actions_B)),B_rewards[A_idx,:],label=MadAction_v1.action_strings[A_idx])
+
+        ax7.set_title(f"{MadEnv_v1.agent_a} Rewards Per Action")
+        ax8.set_title(f"{MadEnv_v1.agent_b} Rewards Per Action")
+        for ax in [ax7, ax8]:
+            ax.set_ylabel("Reward")
+            ax.legend()
+            ax.grid()
 
     def print_final_stats(self):
         #self.do_analysis()
