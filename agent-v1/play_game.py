@@ -30,8 +30,8 @@ def parse_args():
     parser = ap.ArgumentParser(description="Script to test an agent in the mad-v1 gym env")
     parser.add_argument('--env_conf',type=str,default="default.json")
 
-    parser.add_argument('--agent_a',type=str,choices=agent_choices,default=str(AgentType.random))
-    parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.random))
+    parser.add_argument('--agent_a',type=str,choices=agent_choices,default=str(AgentType.valid))
+    parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.valid))
     parser.add_argument('--agent_a_save_path',type=str,default=None)
     parser.add_argument('--agent_a_load_path',type=str,default=None)
     parser.add_argument('--agent_b_save_path',type=str,default=None)
