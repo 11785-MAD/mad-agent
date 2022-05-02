@@ -18,6 +18,11 @@ class Observer:
         self.episodes = 0
         self.mad_episodes = 0 # mad_episode := episode when both players had nukes at same time
         self.fig = None
+        self.winning_turns = []
+        self.winning_actions = []
+        self.A_wins = [] # list of bool, 1 if A won
+        self.B_wins = []
+        self.draws = []
 
         # per episode records
         self.actions_A = [] # list of action indices
@@ -26,7 +31,6 @@ class Observer:
         self.rewards_A = []
         self.rewards_B = []
         self.plotting = False
-
 
     def report_turn(self, S:MadState_v1, A:np.ndarray, R, info, done):
         action = MadAction_v1(A)
@@ -39,9 +43,9 @@ class Observer:
         self.states.append(S.data.copy())
 
         if done:
-            self.episode_finisher()
+            self.episode_finisher(info)
 
-    def episode_finisher(self):
+    def episode_finisher(self, info):
         """
         """
         states = np.array(self.states).T # 10*T
@@ -53,6 +57,12 @@ class Observer:
             self.turns_acquired_nukes.append(turn_acquired_nukes)
             self.mad_turns.append(len(nuke_indicator) - turn_acquired_nukes)
             self.mad_episodes += 1
+
+        self.winning_turns.append(min(len(self.actions_A), len(self.actions_B)))
+        self.A_wins.append(info["winner"] == MadEnv_v1.agent_a)
+        self.B_wins.append(info["winner"] == MadEnv_v1.agent_b)
+        self.draws.append(info["winner"] == None)
+        self.winning_actions.append(info["action"].action_idx)
 
         self.episodes += 1
         
@@ -180,24 +190,23 @@ class Observer:
         print("Total MAD episodes:", self.mad_episodes)
         print("Average turn acquired nukes:", np.mean(self.turns_acquired_nukes))
         print("Average MAD turns:", np.mean(self.mad_turns))
+        print("Average winning turn:", np.mean(self.winning_turns))
+        print("Agent A win percentage:", np.mean(self.A_wins))
+        print("Agent A winning actions:", self.get_action_histogram(np.array(self.winning_actions)[np.array(self.A_wins)]))
+        print("Agent B win percentage:", np.mean(self.B_wins))
+        print("Draw percentage:", np.mean(self.draws))
 
-    def get_action_histogram(self):
-        A_hist = {}
-        B_hist = {}
 
+    def get_action_histogram(self, action_idx_list):
+        hist = {}
         for a in MadAction_v1.action_strings_short:
-            A_hist[a] = 0
-            B_hist[a] = 0
-
-        for idx in self.actions_A:
-            A_hist[MadAction_v1.action_strings_short[idx]] += 1
-
-        for idx in self.actions_B:
-            B_hist[MadAction_v1.action_strings_short[idx]] += 1
-
-        return A_hist, B_hist
+            hist[a] = 0
+        for idx in action_idx_list:
+            hist[MadAction_v1.action_strings_short[idx]] += 1
+        return hist
 
     def print_action_histograms(self):
-        A, B = self.get_action_histogram()
+        A = self.get_action_histogram(self.actions_A)
+        B = self.get_action_histogram(self.actions_B)
         print(f"A ac hist: {A}")
         print(f"B ac hist: {B}")
