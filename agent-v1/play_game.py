@@ -30,8 +30,8 @@ def parse_args():
     parser = ap.ArgumentParser(description="Script to test an agent in the mad-v1 gym env")
     parser.add_argument('--env_conf',type=str,default="default.json")
 
-    parser.add_argument('--agent_a',type=str,choices=agent_choices,default=str(AgentType.valid))
-    parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.valid))
+    parser.add_argument('--agent_a',type=str,choices=agent_choices,default=str(AgentType.dqn))
+    parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.random))
     parser.add_argument('--agent_a_save_path',type=str,default=None)
     parser.add_argument('--agent_a_load_path',type=str,default=None)
     parser.add_argument('--agent_b_save_path',type=str,default=None)
@@ -176,7 +176,7 @@ def main():
 
 
             time.sleep(args.turn_delay)
-            observer.report_turn(env.S, action_vec, reward, info, done)
+            if not is_burn_in_episode: observer.report_turn(env.S, action_vec, reward, info, done)
             observations = new_observations
 
             printif(f"End turn {info['turn_count']}\n",flag=PRINT)

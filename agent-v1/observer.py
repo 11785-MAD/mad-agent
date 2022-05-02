@@ -63,7 +63,6 @@ class Observer:
         self.B_wins.append(info["winner"] == MadEnv_v1.agent_b)
         self.draws.append(info["winner"] == None)
         self.winning_actions.append(info["action"].action_idx)
-
         self.episodes += 1
         
         # plot stuff
