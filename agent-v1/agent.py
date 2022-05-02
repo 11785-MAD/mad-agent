@@ -1,5 +1,6 @@
 import numpy as np
 import torch.nn as nn
+from gym_mad.envs.mad_env_v1 import MadEnv_v1, MadState_v1, MadAction_v1, MadGameConfig_v1
         
 def one_hot(action_size:int, action_index:int) -> np.ndarray:
     action_vec = np.zeros(action_size)
@@ -36,4 +37,26 @@ class RandomAgent(MadAgent_v1):
     def choose_action(self, observation):
         # Choose a random action
         action_idx = np.random.randint(0, self.action_size)
+        return one_hot(self.action_size, action_idx)
+
+class RandomValidAgent(MadAgent_v1):
+    def __init__(self, observation_size, action_size, config):
+        super().__init__(observation_size, action_size)
+        self.config = config
+
+    def choose_action(self, observation):
+        valid_actions = []
+        S = MadState_v1(self.config)
+        for A_idx in range(MadAction_v1.action_size):
+            A = MadAction_v1(one_hot(MadAction_v1.action_size, A_idx))
+            S.data = observation.copy()
+            reward, done, winner, info = A.apply_dynamics(S, self.config)
+            if reward == self.config.data["invalid_penalty"] or reward == self.config.data["over_max_penalty"]:
+                continue
+            valid_actions.append(A_idx)
+
+        if len(valid_actions) > 0:
+            action_idx = np.random.choice(np.array(valid_actions))
+        else:
+            action_idx = np.random.randint(0, self.action_size)
         return one_hot(self.action_size, action_idx)

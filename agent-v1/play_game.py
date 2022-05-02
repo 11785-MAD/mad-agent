@@ -9,7 +9,7 @@ from enum import Enum, auto
 import gym
 import gym_mad
 import agent as ag
-from agent import RandomAgent
+from agent import RandomAgent, RandomValidAgent
 from dqn import DQNAgent
 from observer import Observer
 import torch
@@ -17,6 +17,7 @@ import torch
 class AgentType(Enum):
     human = auto()
     random = auto()
+    valid = auto()
     dqn = auto()
 
     def __str__(self):
@@ -61,6 +62,8 @@ def get_player(env, agent_type_str:str, save_path:str, load_path:str, args) -> a
         raise ValueError("Human player not yet implemented")
     elif agent_type_str == str(AgentType.random):
         agent = RandomAgent(env.observation_size, env.action_size)
+    elif agent_type_str == str(AgentType.valid):
+        agent = RandomValidAgent(env.observation_size, env.action_size, env.config)
     elif agent_type_str == str(AgentType.dqn):
         agent = DQNAgent(
                         observation_size = env.observation_size, 
