@@ -20,6 +20,7 @@ class Observer:
         self.fig = None
         self.winning_turns = []
         self.winning_actions = []
+        self.winning_cash_sizes = []
         self.A_wins = [] # list of bool, 1 if A won
         self.B_wins = []
         self.draws = []
@@ -43,9 +44,9 @@ class Observer:
         self.states.append(S.data.copy())
 
         if done:
-            self.episode_finisher(info)
+            self.episode_finisher(info, S)
 
-    def episode_finisher(self, info):
+    def episode_finisher(self, info, S):
         """
         """
         states = np.array(self.states).T # 10*T
@@ -63,6 +64,13 @@ class Observer:
         self.B_wins.append(info["winner"] == MadEnv_v1.agent_b)
         self.draws.append(info["winner"] == None)
         self.winning_actions.append(info["action"].action_idx)
+        if (info["winner"] == MadEnv_v1.agent_a):
+            self.winning_cash_sizes.append(S.cash_a)
+        elif (info["winner"] == MadEnv_v1.agent_b):
+            self.winning_cash_sizes.append(S.cash_b)
+        else:
+            self.winning_cash_sizes.append(None)
+
         self.episodes += 1
         
         # plot stuff
@@ -191,10 +199,12 @@ class Observer:
         print("Average MAD turns:", np.mean(self.mad_turns))
         print("Average winning turn:", np.mean(self.winning_turns))
         print("Agent A win percentage:", np.mean(self.A_wins))
-        print("Agent A winning actions:", self.get_action_histogram(np.array(self.winning_actions)[np.array(self.A_wins)]))
         print("Agent B win percentage:", np.mean(self.B_wins))
         print("Draw percentage:", np.mean(self.draws))
-
+        print("Agent A winning actions:", self.get_action_histogram(np.array(self.winning_actions)[np.array(self.A_wins)]))
+        print("Agent B winning actions:", self.get_action_histogram(np.array(self.winning_actions)[np.array(self.B_wins)]))
+        print("Agent A average winning economy size:", np.mean(np.array(self.winning_cash_sizes)[np.array(self.A_wins)]))
+        print("Agent B average winning economy size:", np.mean(np.array(self.winning_cash_sizes)[np.array(self.B_wins)]))
 
     def get_action_histogram(self, action_idx_list):
         hist = {}
