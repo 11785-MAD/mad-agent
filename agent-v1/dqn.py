@@ -61,10 +61,12 @@ class QNetwork(nn.Module):
         summary(self.model, x)
 
     def save_state_dict(self, path:str) -> None:
-        pass
+        print(f"Saved DQN model to {path}")
+        torch.save(self.model.state_dict(),path)
 
     def load_state_dict(self, path:str) -> None:
-        pass
+        self.model.load_state_dict(torch.load(path))
+        print(f"Loaded DQN model from {path}")
 
 class Transition():
     '''
@@ -152,6 +154,8 @@ class DQNAgent(agent.MadAgent_v1):
     def __init__(self,
                  observation_size:int, 
                  action_size:int,
+                 save_path:str = None,
+                 load_path:str = None,
                  epsilon:float = 0.05,
                  optimizer_lr:float = 5e-4,
                  discount:float = 0.99,
@@ -174,10 +178,14 @@ class DQNAgent(agent.MadAgent_v1):
         self.epsilon = epsilon
         self.discount = discount
         self.target_update_period = target_update_period
+        self.save_path = save_path
 
         self.Q_w = QNetwork(observation_size, action_size, optimizer_lr, model_hidden_size, model_num_layers, no_cuda)
         self.Q_w.print_summary()
-        self.Q_target = QNetwork(observation_size, action_size, optimizer_lr,model_hidden_size, model_num_layers, no_cuda)
+        if load_path:
+            self.Q_w.load_state_dict(load_path)
+        self.Q_target = QNetwork(observation_size, action_size, optimizer_lr, model_hidden_size, model_num_layers, no_cuda)
+        self.set_Q_target()
         self.R = ReplayBuffer(buffer_size, buffer_batch_size)
 
         self.c = 0 # Step counter
@@ -251,6 +259,10 @@ class DQNAgent(agent.MadAgent_v1):
             if self.burn_in_bar is not None:
                 self.burn_in_bar.close()
             print(f"DQN finished {self.buffer_burn_in} burn in episodes")
+            return
+
+        if not self.is_burning_in and self.save_path:
+            self.Q_w.save_state_dict(self.save_path)
 
     def choose_action(self, observation):
         assert len(observation) == self.observation_size

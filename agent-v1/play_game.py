@@ -31,8 +31,10 @@ def parse_args():
 
     parser.add_argument('--agent_a',type=str,choices=agent_choices,default=str(AgentType.random))
     parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.random))
-    parser.add_argument('--agent_a_path',type=str,default=None)
-    parser.add_argument('--agent_b_path',type=str,default=None)
+    parser.add_argument('--agent_a_save_path',type=str,default=None)
+    parser.add_argument('--agent_a_load_path',type=str,default=None)
+    parser.add_argument('--agent_b_save_path',type=str,default=None)
+    parser.add_argument('--agent_b_load_path',type=str,default=None)
     parser.add_argument('--turn_delay','-d',type=float,default=0)
 
     parser.add_argument('--seed', type=int, default=0)
@@ -54,7 +56,7 @@ def parse_args():
     parser.add_argument('--no_cuda', action="store_true")
     return parser.parse_args()
 
-def get_player(env, agent_type_str:str, path:str, args) -> ag.MadAgent_v1:
+def get_player(env, agent_type_str:str, save_path:str, load_path:str, args) -> ag.MadAgent_v1:
     if agent_type_str == str(AgentType.human):
         raise ValueError("Human player not yet implemented")
     elif agent_type_str == str(AgentType.random):
@@ -63,6 +65,8 @@ def get_player(env, agent_type_str:str, path:str, args) -> ag.MadAgent_v1:
         agent = DQNAgent(
                         observation_size = env.observation_size, 
                         action_size = env.action_size,
+                        save_path = save_path,
+                        load_path = load_path,
                         epsilon = args.dqn_eps,
                         optimizer_lr = args.dqn_lr,
                         discount = args.dqn_discount,
@@ -97,8 +101,16 @@ def main():
 
     # Currently setup for two AI playing against each other
     # Seperate AI for each player
-    agent_a = get_player(env, args.agent_a, args.agent_a_path, args)
-    agent_b = get_player(env, args.agent_b, args.agent_b_path, args)
+    agent_a = get_player(env, 
+                         args.agent_a, 
+                         args.agent_a_save_path, 
+                         args.agent_a_load_path, 
+                         args)
+    agent_b = get_player(env, 
+                         args.agent_b, 
+                         args.agent_b_save_path, 
+                         args.agent_b_load_path, 
+                         args)
 
     episode = 0
     is_burn_in_episode = False
