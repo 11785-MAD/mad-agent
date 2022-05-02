@@ -48,6 +48,7 @@ class QNetwork(nn.Module):
         self.device = torch.device("cuda" if cuda else "cpu")
         self.model = DeepModel(input_size, output_size, hidden_size, num_layers).to(self.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = lr)
+        self.input_size = input_size
         for name, param in self.model.named_parameters():
             if 'weight' in name:
                 torch.nn.init.kaiming_uniform_(param, nonlinearity='relu')
