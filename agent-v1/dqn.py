@@ -252,7 +252,7 @@ class DQNAgent(agent.MadAgent_v1):
             return self.policy_random()
 
         q_vals = self.Q_w(observation).detach().cpu().numpy()
-        print(q_vals)
+        # print(q_vals)
         if self.training:
             return self.policy_epsilon_greedy(q_vals)
 
