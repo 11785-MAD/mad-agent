@@ -50,11 +50,17 @@ class RandomValidAgent(MadAgent_v1):
         for A_idx in range(MadAction_v1.action_size):
             A = MadAction_v1(one_hot(MadAction_v1.action_size, A_idx))
             S.data = observation.copy()
+            S.cash_a *= S.config.data["max_cash"]
+            S.cash_b *= S.config.data["max_cash"]
+            S.income_a *= S.config.data["max_income"]
+            S.income_b *= S.config.data["max_income"]
+            S.military_a *= S.config.data["max_military"]
+            S.military_b *= S.config.data["max_military"]
             reward, done, winner, info = A.apply_dynamics(S, self.config)
-            if reward == self.config.data["invalid_penalty"] or reward == self.config.data["over_max_penalty"]:
+            if reward/self.config.data["reward_scale"] == self.config.data["invalid_penalty"] or reward/self.config.data["reward_scale"] == self.config.data["over_max_penalty"]:
                 continue
             valid_actions.append(A_idx)
-
+        #print(valid_actions)
         if len(valid_actions) > 0:
             action_idx = np.random.choice(np.array(valid_actions))
         else:
