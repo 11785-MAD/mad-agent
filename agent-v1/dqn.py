@@ -8,6 +8,7 @@ import agent
 from agent import one_hot
 import torch
 import torch.nn as nn
+from torchsummaryX import summary
 import numpy as np
 import copy
 import collections
@@ -42,6 +43,7 @@ class QNetwork(nn.Module):
     '''
     def __init__(self, input_size, output_size, lr, hidden_size, num_layers, no_cuda):
         super().__init__()
+        self.input_size = input_size
         cuda = torch.cuda.is_available() and not no_cuda
         self.device = torch.device("cuda" if cuda else "cpu")
         self.model = DeepModel(input_size, output_size, hidden_size, num_layers).to(self.device)
@@ -49,11 +51,14 @@ class QNetwork(nn.Module):
         for name, param in self.model.named_parameters():
             if 'weight' in name:
                 torch.nn.init.kaiming_uniform_(param, nonlinearity='relu')
-        print(self.model)
 
     def forward(self, state:np.ndarray) -> torch.Tensor:
         x = torch.Tensor(state).to(self.device)  # TODO: send to correct device
         return self.model(x)
+
+    def print_summary(self):
+        x = torch.zeros((self.input_size)).to(self.device)
+        summary(self.model, x)
 
     def save_state_dict(self, path:str) -> None:
         pass
@@ -171,6 +176,7 @@ class DQNAgent(agent.MadAgent_v1):
         self.target_update_period = target_update_period
 
         self.Q_w = QNetwork(observation_size, action_size, optimizer_lr, model_hidden_size, model_num_layers, no_cuda)
+        self.Q_w.print_summary()
         self.Q_target = QNetwork(observation_size, action_size, optimizer_lr,model_hidden_size, model_num_layers, no_cuda)
         self.R = ReplayBuffer(buffer_size, buffer_batch_size)
 
