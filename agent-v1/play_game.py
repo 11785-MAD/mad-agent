@@ -28,33 +28,55 @@ agent_choices = [name for name, member in AgentType.__members__.items()]
 
 def parse_args():
     parser = ap.ArgumentParser(description="Script to test an agent in the mad-v1 gym env")
-    parser.add_argument('--env_conf',type=str,default="default.json")
+    parser.add_argument('-v',action='count',default=0,
+        help="Verbosity level. Level 0: Run quietly. Lvl 1 (-v): Basic output. Lvl 2 (-vv): Show results from eval. Lvl 3 (-vvv): Show turn descriptions for eval. Default: 0")
+    parser.add_argument('--env_conf',type=str,default="default.json",
+        help="Filename for environment config file. File should be in the config folder where mad-game is installed. Default: default.json")
+    parser.add_argument('--agent_a',type=str,choices=agent_choices,default=str(AgentType.dqn),
+        help="Type of agent for agent A. Default: dqn")
+    parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.random),
+        help="Type of agent for agent B. Default: random")
+    parser.add_argument('--agent_a_save_path',type=str,default=None,
+        help="Path to save torch state dict for dqn agent. Saves each epoch. Default: None")
+    parser.add_argument('--agent_a_load_path',type=str,default=None,
+        help="Path to load torch state dict for dqn agent. Default: None")
+    parser.add_argument('--agent_b_save_path',type=str,default=None,
+        help="Path to save torch state dict for dqn agent. Saves each epoch. Default: None")
+    parser.add_argument('--agent_b_load_path',type=str,default=None,
+        help="Path to load torch state dict for dqn agent. Default: None")
+    parser.add_argument('--turn_delay','-d',type=float,default=0,
+        help="Time delay in seconds after each turn. Useful for debugging with -vvv. Default: 0")
 
-    parser.add_argument('--agent_a',type=str,choices=agent_choices,default=str(AgentType.dqn))
-    parser.add_argument('--agent_b',type=str,choices=agent_choices,default=str(AgentType.random))
-    parser.add_argument('--agent_a_save_path',type=str,default=None)
-    parser.add_argument('--agent_a_load_path',type=str,default=None)
-    parser.add_argument('--agent_b_save_path',type=str,default=None)
-    parser.add_argument('--agent_b_load_path',type=str,default=None)
-    parser.add_argument('--turn_delay','-d',type=float,default=0)
+    parser.add_argument('--seed', type=int, default=0,
+        help="Seed number for torch and numpy. Default: 0")
+    parser.add_argument('--train_episodes',type=int,default=30,
+        help="Number of episodes for training the agent. Default: 30")
+    parser.add_argument('--eval_freq',type=int,default=4,
+        help="Period for evaluating model. Default: 4")
 
-    parser.add_argument('--seed', type=int, default=0)
-    parser.add_argument('--train_episodes',type=int,default=1000)
-    parser.add_argument('--eval_freq',type=int,default=4)
 
-    parser.add_argument('-v',action='count',default=0,help="Verbose")
-
-    parser.add_argument('--dqn_eps', type=float,default=0.1)
-    parser.add_argument('--dqn_lr', type=float,default=0.0001)
-    parser.add_argument('--dqn_discount', type=float, default=0.99)
-    parser.add_argument('--dqn_buffer_size', type=int, default=50000)
-    parser.add_argument('--dqn_buffer_batch', type=int, default=64)
-    parser.add_argument('--dqn_buffer_burn_in', type=int, default=300)
-    parser.add_argument('--no_dqn_burn_in_bar',action='store_false')
-    parser.add_argument('--dqn_target_update_period',type=int,default=50)
-    parser.add_argument('--dqn_model_hidden_size',type=int,default=128)
-    parser.add_argument('--dqn_model_num_layers',type=int,default=5)
-    parser.add_argument('--no_cuda', action="store_true")
+    parser.add_argument('--dqn_eps', type=float,default=0.1,
+        help="Epsilon value for epsilone greedy. Probability that agent takes random action during training. Default: 0.1")
+    parser.add_argument('--dqn_lr', type=float,default=0.0001,
+        help="Learning rate. Default: 0.0001")
+    parser.add_argument('--dqn_discount', type=float, default=0.99,
+        help="Discount factor. Default: 0.99")
+    parser.add_argument('--dqn_buffer_size', type=int, default=50000,
+        help="Number of transitions to store in experience replay buffer. Default=50000")
+    parser.add_argument('--dqn_buffer_batch', type=int, default=64,
+        help="Batch size of transitions sampled from replay buffer. Default=64")
+    parser.add_argument('--dqn_buffer_burn_in', type=int, default=300,
+        help="Number of episodes to use to burn in replay buffer. Default: 300")
+    parser.add_argument('--no_dqn_burn_in_bar',action='store_false',
+        help="Disables the tqdm bar for burning in")
+    parser.add_argument('--dqn_target_update_period',type=int,default=50,
+        help="Number of steps to wait for updating target network with current weights. Default: 50")
+    parser.add_argument('--dqn_model_hidden_size',type=int,default=128,
+        help="Width of the linear layers in the dqn model. Default: 128")
+    parser.add_argument('--dqn_model_num_layers',type=int,default=5,
+        help="Number of of linear layers in the dqn model. Default: 5")
+    parser.add_argument('--no_cuda', action="store_true",
+        help="Disables use of cuda. If not present, program automatically detects presence of absence of cuda")
     return parser.parse_args()
 
 def get_player(env, agent_type_str:str, save_path:str, load_path:str, args) -> ag.MadAgent_v1:
