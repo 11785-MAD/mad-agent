@@ -25,6 +25,11 @@ class Observer:
         self.B_wins = []
         self.draws = []
 
+        self.episode_rewards_A = []
+        self.episode_rewards_B = []
+        self.all_turn_rewards_A = []
+        self.all_turn_rewards_B = []
+
         # per episode records
         self.actions_A = [] # list of action indices
         self.actions_B = []
@@ -70,6 +75,11 @@ class Observer:
             self.winning_cash_sizes.append(S.cash_b)
         else:
             self.winning_cash_sizes.append(None)
+
+        self.episode_rewards_A.append(sum(self.rewards_A))
+        self.episode_rewards_B.append(sum(self.rewards_B))
+        self.all_turn_rewards_A.extend(self.rewards_A)
+        self.all_turn_rewards_B.extend(self.rewards_B)
 
         self.episodes += 1
         
@@ -204,6 +214,10 @@ class Observer:
         print("Agent B winning actions:", self.get_action_histogram(np.array(self.winning_actions)[np.array(self.B_wins)]))
         print("Agent A average winning economy size:", np.mean(np.array(self.winning_cash_sizes)[np.array(self.A_wins)]))
         print("Agent B average winning economy size:", np.mean(np.array(self.winning_cash_sizes)[np.array(self.B_wins)]))
+        print("Agent A average reward/turn:", sum(self.all_turn_rewards_A)/len(self.all_turn_rewards_A))
+        print("Agent B average reward/turn:", sum(self.all_turn_rewards_B)/len(self.all_turn_rewards_B))
+        print("Agent A average reward/episode:", sum(self.episode_rewards_A)/len(self.episode_rewards_A))
+        print("Agent B average reward/episode:", sum(self.episode_rewards_B)/len(self.episode_rewards_B))
 
     def get_action_histogram(self, action_idx_list):
         hist = {}
