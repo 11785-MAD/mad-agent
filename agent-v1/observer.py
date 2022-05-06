@@ -192,7 +192,6 @@ class Observer:
             ax.grid()
 
     def print_final_stats(self):
-        #self.do_analysis()
         print("Total episodes:", self.episodes)
         print("Total MAD episodes:", self.mad_episodes)
         print("Average turn acquired nukes:", np.mean(self.turns_acquired_nukes))
