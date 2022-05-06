@@ -54,7 +54,7 @@ class QNetwork(nn.Module):
                 torch.nn.init.kaiming_uniform_(param, nonlinearity='relu')
 
     def forward(self, state:np.ndarray) -> torch.Tensor:
-        x = torch.Tensor(state).to(self.device)  # TODO: send to correct device
+        x = torch.Tensor(state).to(self.device)
         return self.model(x)
 
     def print_summary(self):
@@ -141,7 +141,6 @@ class ReplayBuffer():
 
         batch_size = min(batch_size, len(self.queue))
 
-        # TODO: use random.choice instead
         indices = np.random.choice(len(self.queue), size=batch_size, replace = False)
         transitions = TransitionList()
 
@@ -169,12 +168,6 @@ class DQNAgent(agent.MadAgent_v1):
                  model_num_layers = 3,
                  no_cuda = False,
                  ):
-        '''
-        Args:
-            observation_size:int - The size of the observations
-            action_size:int - The size of the action space
-            epsilon:float - value for epsilon greedy policy
-        '''
         super().__init__(observation_size, action_size)
         self.epsilon = epsilon
         self.discount = discount
@@ -208,7 +201,8 @@ class DQNAgent(agent.MadAgent_v1):
     def set_Q_target(self):
         self.Q_target.model = copy.deepcopy(self.Q_w.model)
         self.Q_target.eval()
-        # TODO: set requires grad to be false
+        for param in self.Q_target.parameters():
+            param.requires_grad = False
         
     def policy_random(self):
         action_idx = np.random.randint(0, self.action_size)
@@ -231,13 +225,13 @@ class DQNAgent(agent.MadAgent_v1):
         ) = transitions.unpack() # All are np.ndarray
 
         # Calculate Target
-        (max_Q_target, max_indices_Q_target) = torch.max( self.Q_target(next_states), dim=1) # [batch]
+        (max_Q_target, _) = torch.max( self.Q_target(next_states), dim=1) # [batch]
         not_is_terminal_vec = torch.Tensor(np.logical_not(is_terminals)).to(self.Q_w.device) # [batch]
         target = torch.from_numpy(rewards).to(self.Q_w.device) + torch.mul(self.discount*max_Q_target, not_is_terminal_vec)  # [batch]
 
         # Calculate predicted
         q = self.Q_w(states)  # [batch x action_size]
-        (predicted, predicted_indices) = torch.max(q*torch.from_numpy(actions).to(self.Q_w.device), dim=1)  # [batch]
+        (predicted, _) = torch.max(q*torch.from_numpy(actions).to(self.Q_w.device), dim=1)  # [batch]
 
         # Calculate loss
         loss = torch.nn.functional.mse_loss(target,predicted)  # []
@@ -271,7 +265,7 @@ class DQNAgent(agent.MadAgent_v1):
             return self.policy_random()
 
         q_vals = self.Q_w(observation).detach().cpu().numpy()
-        # print(q_vals)
+
         if self.training:
             return self.policy_epsilon_greedy(q_vals)
 
@@ -285,9 +279,7 @@ class DQNAgent(agent.MadAgent_v1):
         
         if self.is_burning_in:
             return
-        # self.baseline = [T.reward for T in self.R.queue]
-        # self.baseline = np.mean(self.baseline)
-        # print("set baseline to ", self.baseline)
+
         self.Q_w.train()
         transitions = self.R.sample_batch()
         self.Q_w.optimizer.zero_grad()

@@ -60,7 +60,7 @@ class RandomValidAgent(MadAgent_v1):
             if reward/self.config.data["reward_scale"] == self.config.data["invalid_penalty"] or reward/self.config.data["reward_scale"] == self.config.data["over_max_penalty"]:
                 continue
             valid_actions.append(A_idx)
-        #print(valid_actions)
+
         if len(valid_actions) > 0:
             action_idx = np.random.choice(np.array(valid_actions))
         else:
