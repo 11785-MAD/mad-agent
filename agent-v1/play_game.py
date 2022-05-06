@@ -59,14 +59,14 @@ def parse_args():
         help="Epsilon value for epsilone greedy. Probability that agent takes random action during training. Default: 0.1")
     parser.add_argument('--dqn_lr', type=float,default=0.0001,
         help="Learning rate. Default: 0.0001")
-    parser.add_argument('--dqn_discount', type=float, default=0.99,
-        help="Discount factor. Default: 0.99")
-    parser.add_argument('--dqn_buffer_size', type=int, default=50000,
-        help="Number of transitions to store in experience replay buffer. Default=50000")
+    parser.add_argument('--dqn_discount', type=float, default=0.8,
+        help="Discount factor. Default: 0.8")
+    parser.add_argument('--dqn_buffer_size', type=int, default=10000,
+        help="Number of transitions to store in experience replay buffer. Default=10000")
     parser.add_argument('--dqn_buffer_batch', type=int, default=64,
         help="Batch size of transitions sampled from replay buffer. Default=64")
-    parser.add_argument('--dqn_buffer_burn_in', type=int, default=300,
-        help="Number of episodes to use to burn in replay buffer. Default: 300")
+    parser.add_argument('--dqn_buffer_burn_in', type=int, default=200,
+        help="Number of episodes to use to burn in replay buffer. Default: 200")
     parser.add_argument('--no_dqn_burn_in_bar',action='store_false',
         help="Disables the tqdm bar for burning in")
     parser.add_argument('--dqn_target_update_period',type=int,default=50,
