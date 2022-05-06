@@ -265,7 +265,7 @@ class DQNAgent(agent.MadAgent_v1):
             return self.policy_random()
 
         q_vals = self.Q_w(observation).detach().cpu().numpy()
-
+        # print(q_vals)
         if self.training:
             return self.policy_epsilon_greedy(q_vals)
 
@@ -276,6 +276,10 @@ class DQNAgent(agent.MadAgent_v1):
             return
         t = Transition(observation, action, reward, new_observation, is_terminal)
         self.R.append(t)
+        if (action[3]>0 or action[4]>0) and reward != -0:
+            #print("nuke transition")
+            for i in range(99):
+                self.R.append(t)
         
         if self.is_burning_in:
             return
