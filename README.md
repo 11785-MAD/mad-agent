@@ -8,4 +8,4 @@ An agent to play Mad Game.
 2. Run game: `agent-vX/play_game.py`
     - (Replace X with corresponding agent version)
 
-For the list of arguments available, see play_game.py
+For the list of arguments available, see `agent-vX/play_game.py`
